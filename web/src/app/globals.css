@@ -1,26 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;800&display=swap');
+
 @import "tailwindcss";
 
+/* 1. Importamos las tipografías del diseño de Un Toque Ahumado */
+
+/* 2. Definimos las variables de forma estricta (Light Mode forzado) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #FAF6F1;
+  --foreground: #1A1008;
+  --card: #FFFFFF;
+  --card-foreground: #1A1008;
+  --primary: #FF5500;
+  --primary-foreground: #FFFFFF;
+  --secondary: #FFF4EA;
+  --secondary-foreground: #8B6040;
+  --muted: #FFF8F2;
+  --muted-foreground: #A08060;
+  --border: #FFE8CC;
+  --ring: #FF5500;
+  --radius: 1rem;
 }
 
+/* 3. Le decimos a Tailwind v4 que use nuestros colores exactos */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* 4. Estilos base y reseteos */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    /* Forzamos a que el body use siempre el fondo crema y la tipografía Montserrat */
+    @apply bg-background text-foreground;
+    font-family: 'Montserrat', sans-serif;
+  }
+  
+  /* Clases utilitarias que traía tu código original */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }

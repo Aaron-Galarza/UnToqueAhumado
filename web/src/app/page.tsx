@@ -1,64 +1,82 @@
-import Image from "next/image";
+import { Search, MapPin } from 'lucide-react';
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-background flex flex-col relative pb-10 font-['Montserrat']">
+      
+      {/* HERO SECTION (Fondo oscuro para contrastar) */}
+      <section className="w-full relative rounded-b-[2.5rem] shadow-md z-10 flex flex-col items-center justify-center bg-zinc-950 pt-12 pb-16">
+        
+        {/* Logo Circular (Test de bordes y sombras) */}
+        <div className="w-24 h-24 rounded-full border-[3px] border-white/90 bg-white shadow-xl flex items-center justify-center overflow-hidden mb-4">
+          <img 
+            src="https://res.cloudinary.com/dwqxdensk/image/upload/v1774491741/image_so7u3x.png" 
+            alt="Un Toque Ahumado" 
+            className="w-[85%] h-[85%] object-contain"
+          />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        {/* Títulos (Test de color primario) */}
+        <h1 className="text-center relative z-10 leading-none font-bold text-white tracking-widest text-4xl md:text-5xl">
+          UN TOQUE <br />
+          <span className="text-primary mt-1 block">AHUMADO</span>
+        </h1>
+        <p className="mt-3 font-bold tracking-[0.2em] uppercase text-xs text-orange-100">
+          Burguers smash premium
+        </p>
+
+      </section>
+
+      {/* CONTENEDOR PRINCIPAL */}
+      <main className="flex-1 w-full max-w-3xl mx-auto px-4 relative z-20" style={{ marginTop: -24 }}>
+        
+        {/* DASHBOARD CARD (Test de bg-card, border-border, y text-foreground) */}
+        <div className="bg-card rounded-2xl shadow-sm p-4 mb-4 border border-border">
+          
+          <div className="flex items-center justify-between mb-4 px-1">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+              </span>
+              <span className="text-xs font-extrabold text-foreground uppercase tracking-wide">
+                Abierto ahora
+              </span>
+            </div>
+            <span className="text-[10px] font-bold text-secondary-foreground bg-secondary px-2 py-1 rounded border border-border">
+              Cierra 23:00hs
+            </span>
+          </div>
+
+          {/* INPUT (Test de inputs y anillos de focus) */}
+          <div className="relative">
+            <Search className="w-4 h-4 text-muted-foreground absolute left-3.5 top-3" />
+            <input 
+              type="text" 
+              placeholder="Buscar hamburguesas, promos..." 
+              className="w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground font-medium transition-all outline-none"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
         </div>
+
+        {/* TARJETA DE PRUEBA (Para ver cómo queda una burger) */}
+        <div className="bg-card rounded-2xl p-4 border border-border shadow-sm flex gap-4 mt-6">
+           <div className="flex-1 flex flex-col justify-center">
+             <h3 className="font-bold text-foreground text-base leading-tight mb-1">
+               Doble Smash Clásica
+             </h3>
+             <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+               Doble carne smash, queso cheddar, cebolla caramelizada, salsa especial.
+             </p>
+             <span className="font-extrabold text-primary text-lg">
+               $10.900
+             </span>
+           </div>
+           <div className="w-24 h-24 shrink-0 bg-secondary rounded-xl border border-border flex items-center justify-center text-muted-foreground">
+             <MapPin size={24} opacity={0.5} />
+           </div>
+        </div>
+
       </main>
     </div>
   );
