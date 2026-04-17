@@ -1,9 +1,6 @@
-import React from 'react'
+import { CheckoutView } from "@/features/checkout/components/CheckoutView";
 
 export default function CheckoutPage() { 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-foreground">Checkout</h1>
-    </div>
-  )
+  // Simplemente renderizamos la vista que construimos en la feature
+  return <CheckoutView />;
 }

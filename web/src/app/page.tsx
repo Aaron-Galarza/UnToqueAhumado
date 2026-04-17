@@ -1,6 +1,7 @@
 import { Search } from 'lucide-react';
 
 // 1. Importamos la "Bandeja" (El componente visual) y la "Comida" (Los datos)
+import { FloatingCart } from '@/features/cart/components/FloatingCart';
 import { ProductList } from '@/features/menu/components/ProductList';
 import { mockProducts } from '@/features/menu/data/mockProducts';
 
@@ -69,7 +70,7 @@ export default function Home() {
           {/* Le pasamos el array de mockProducts al ProductList */}
           <ProductList products={mockProducts} />
         </div>
-
+<FloatingCart />
       </main>
     </div>
   );

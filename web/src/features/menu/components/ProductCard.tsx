@@ -1,13 +1,33 @@
+"use client";
+
 import React from "react";
 import { Plus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Product } from "../types/product";
+import { useCartStore } from '@/stores/cartStore';
 
 interface ProductCardProps {
   product: Product;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+
+  const addItem = useCartStore((state) => state.addItem);
+
+  const handleAddToCart = () => {
+    // Armamos el "paquete" con el formato exacto que pide el Carrito
+    addItem({
+      id: product.id,
+      name: product.title, 
+      price: product.price,
+      image: product.image,
+      category: product.category,
+      quantity: 1, 
+      adicionales: {}, 
+    });  
+
+  };
+
   return (
     <Card className="flex flex-row justify-between p-4 hover:bg-muted/50 transition-colors cursor-pointer group gap-4">
       
@@ -32,13 +52,13 @@ export function ProductCard({ product }: ProductCardProps) {
           className="w-full h-full object-cover rounded-xl shadow-sm border border-border group-hover:scale-105 transition-transform duration-300"
         />
         
-        {/* Botón "+" (Por ahora visual, sin lógica de carrito) */}
+        {/* Botón "+" (¡Ahora SÍ funciona y está conectado al cerebro!) */}
         <button 
           onClick={(e) => {
-            e.stopPropagation(); // Evita que al hacer clic en el botón se abra otra cosa
-            console.log(`Se agregó ${product.title} al carrito`);
+            e.stopPropagation(); // 1. Evita que el clic se propague al resto de la tarjeta
+            handleAddToCart();   // 2. Manda la hamburguesa a Zustand
           }}
-          className="absolute -bottom-2 -right-2 bg-card text-primary border-2 border-primary rounded-full p-1.5 shadow-md hover:bg-primary hover:text-primary-foreground transition-colors"
+          className="absolute -bottom-2 -right-2 bg-card text-primary border-2 border-primary rounded-full p-1.5 shadow-md hover:bg-primary hover:text-primary-foreground transition-colors cursor-pointer"
           title="Agregar al pedido"
         >
           <Plus className="w-4 h-4 md:w-5 md:h-5" />
