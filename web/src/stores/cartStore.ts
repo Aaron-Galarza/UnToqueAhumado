@@ -2,32 +2,36 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { CartItem } from '@/features/cart/types/cart';
 
-// 1. EL CONTRATO: Le decimos a TypeScript exactamente qué va a recordar el cerebro
-interface CartState {
-  items: CartItem[]; // La lista de productos
-  addItem: (item: CartItem) => void; // Función para meter algo al carrito
-  removeItem: (id: number) => void;  // Función para sacar algo
-  updateQuantity: (id: number, delta: number) => void; // Sumar/restar principal
-  updateAdicional: (itemId: number, adId: string, delta: number) => void; // Sumar/restar extras
-  clearCart: () => void; // Vaciar todo (para cuando pagan)
+// Definimos el formato de los datos del pedido
+export interface OrderData {
+  name: string;
+  phone: string;
+  address: string;
+  deliveryType: 'takeaway' | 'delivery';
+  discountApplied: boolean;
 }
 
-// 2. LA CREACIÓN: Acá nace el cerebro usando `create` de Zustand
+interface CartState {
+  items: CartItem[];
+  orderData: OrderData | null; // <--- NUEVO: Para guardar los datos del cliente
+  addItem: (item: CartItem) => void;
+  removeItem: (id: number) => void;
+  updateQuantity: (id: number, delta: number) => void;
+  updateAdicional: (itemId: number, adId: string, delta: number) => void;
+  setOrderData: (data: OrderData) => void; // <--- NUEVO: Para guardar la info antes del checkout
+  clearCart: () => void;
+}
+
 export const useCartStore = create<CartState>()(
-  // `persist` hace la magia de guardar todo en la memoria del navegador automáticamente
   persist(
     (set) => ({
-      // A. ESTADO INICIAL: Arrancamos con la lista vacía (cero harcodeo)
-      items: [], 
+      items: [],
+      orderData: null, // Arranca sin datos del cliente
 
-      // B. LAS ACCIONES (Las mismas funciones que antes tenías en la página, pero ahora viven acá)
-      
       addItem: (newItem) => set((state) => {
-        // Lógica para que si agregás la misma burger 2 veces, se sume la cantidad en vez de duplicar la tarjeta
         const existingItemIndex = state.items.findIndex(
           (item) => item.id === newItem.id && JSON.stringify(item.adicionales) === JSON.stringify(newItem.adicionales)
         );
-
         if (existingItemIndex >= 0) {
           const newItems = [...state.items];
           newItems[existingItemIndex].quantity += newItem.quantity;
@@ -57,10 +61,13 @@ export const useCartStore = create<CartState>()(
         })
       })),
 
-      clearCart: () => set({ items: [] }),
+      setOrderData: (data) => set({ orderData: data }),
+
+      // Modificamos clearCart para que también borre los datos del cliente
+      clearCart: () => set({ items: [], orderData: null }), 
     }),
     {
-      name: 'cart-storage', // El nombre del archivo oculto en el navegador
+      name: 'cart-storage',
     }
   )
 );

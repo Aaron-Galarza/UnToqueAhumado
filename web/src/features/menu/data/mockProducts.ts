@@ -59,14 +59,14 @@ export const mockProducts: Product[] = [
     badge: "Viene con papas crinkles"
   },
 
-  // --- PAPAS FRITAS ---
+  // --- ACOMPAÑAMIENTOS (Antes Papas Fritas) ---
   {
     id: 7,
     title: "Papas Fritas Crinkles",
     description: "Bandeja de papas fritas crinkles 400gr, sazonado especial.",
     price: 6200,
     image: "https://images.unsplash.com/photo-1576107232684-1279f3908594?auto=format&fit=crop&w=800&q=80",
-    category: "Papas Fritas"
+    category: "Acompañamientos"
   },
   {
     id: 8,
@@ -74,25 +74,25 @@ export const mockProducts: Product[] = [
     description: "Bandeja de papas fritas crinkles 400gr bañadas en abundante cheddar.",
     price: 7200,
     image: "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?auto=format&fit=crop&w=800&q=80",
-    category: "Papas Fritas"
+    category: "Acompañamientos"
   },
   {
     id: 9,
-    title: "Papas Fritas Cheddar & Bacon",
+    title: "Papas Cheddar & Bacon",
     description: "Bandeja de papas fritas crinkles 400gr con lluvia de cheddar y bacon crujiente.",
     price: 8200,
     image: "https://images.unsplash.com/photo-1629814545199-73dfdb5c7428?auto=format&fit=crop&w=800&q=80",
-    category: "Papas Fritas"
+    category: "Acompañamientos"
   },
 
-  // --- COMBOS BOX ---
+  // --- PROMOS (Antes Combos Box) ---
   {
     id: 10,
     title: "Box Cheeseburger (Combo Dúo)",
     description: "Caja con 2 Cheeseburger Simples, Papas con Cheddar y 1 Dip a elección.",
     price: 14500,
     image: "https://images.unsplash.com/photo-1561758033-d89a9ad46330?auto=format&fit=crop&w=800&q=80",
-    category: "Combos Box"
+    category: "Promos"
   },
   {
     id: 11,
@@ -100,7 +100,7 @@ export const mockProducts: Product[] = [
     description: "Caja con 2 Cheeseburger Dobles y Papas con Cheddar.",
     price: 16900,
     image: "https://images.unsplash.com/photo-1603064752734-4c48eff53d05?auto=format&fit=crop&w=800&q=80",
-    category: "Combos Box"
+    category: "Promos"
   },
   {
     id: 12,
@@ -108,6 +108,6 @@ export const mockProducts: Product[] = [
     description: "Caja con 2 Bacon Burgers Dobles y Papas con Cheddar. (El más premium).",
     price: 20000,
     image: "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=800&q=80",
-    category: "Combos Box"
+    category: "Promos"
   }
 ];

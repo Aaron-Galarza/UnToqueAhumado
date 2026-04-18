@@ -33,7 +33,7 @@ export default function CartPage() {
   const [discountApplied, setDiscountApplied] = useState(false);
   const [customerData, setCustomerData] = useState({ name: '', phone: '', address: '' });
   const [formErrors, setFormErrors] = useState({ name: '', phone: '', address: '' });
-
+  const setOrderData = useCartStore((state) => state.setOrderData);
   // 3. CÁLCULOS
   const itemTotal = (item: CartItem) => {
     const adExtra = CART_EXTRAS.reduce((acc, a) => acc + (item.adicionales[a.id] || 0) * a.price, 0);
@@ -93,7 +93,13 @@ export default function CartPage() {
       window.scrollTo({ top: 300, behavior: 'smooth' });
       return; 
     }
-
+  setOrderData({
+      name: customerData.name,
+      phone: customerData.phone,
+      address: customerData.address,
+      deliveryType: deliveryType,
+      discountApplied: discountApplied,
+    });
     router.push('/checkout');
   };
 

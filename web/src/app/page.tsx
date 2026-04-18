@@ -1,16 +1,43 @@
+"use client";
+
+import { useState } from 'react';
 import { Search } from 'lucide-react';
 
-// 1. Importamos la "Bandeja" (El componente visual) y la "Comida" (Los datos)
+// 1. Importamos tus componentes y datos originales
 import { FloatingCart } from '@/features/cart/components/FloatingCart';
 import { ProductList } from '@/features/menu/components/ProductList';
 import { mockProducts } from '@/features/menu/data/mockProducts';
 
+// 2. Importamos los componentes nuevos
+import { CategorySelector } from '@/features/menu/components/CategorySelector';
+import { MenuSearch } from '@/features/menu/components/MenuSearch';
+
 export default function Home() {
+  // --- ESTADOS PARA FILTRAR ---
+  const [activeCategory, setActiveCategory] = useState("Hamburguesas Artesanales");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // --- FUNCIÓN MÁGICA PARA LIMPIAR ACENTOS ---
+  const removeAccents = (str: string) => {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  };
+
+  // --- LÓGICA DE FILTRO MEJORADA ---
+  const filteredProducts = mockProducts.filter(p => {
+    const productName = p.title || "";
+    
+    // Limpiamos el nombre del producto (minúsculas y sin acentos)
+    const normalizedName = removeAccents(productName.toLowerCase());
+    // Limpiamos lo que escribió el usuario (minúsculas y sin acentos)
+    const normalizedSearch = removeAccents(searchTerm.toLowerCase());
+    
+    return p.category === activeCategory && normalizedName.includes(normalizedSearch);
+  });
+
   return (
     <div className="min-h-screen bg-background flex flex-col relative pb-10">
       
-      {/* HERO SECTION (Intacto) */}
-  {/* HERO SECTION (Con fondo de hamburguesa) */}
+      {/* HERO SECTION (Tu foto de fondo intacta) */}
       <section 
         className="w-full relative rounded-b-[2.5rem] shadow-md z-10 flex flex-col items-center justify-center pt-12 pb-16 bg-cover bg-center"
         style={{
@@ -32,45 +59,58 @@ export default function Home() {
           Burguers smash premium
         </p>
       </section>
+
       {/* CONTENEDOR PRINCIPAL */}
       <main className="flex-1 w-full max-w-3xl mx-auto px-4 relative z-20" style={{ marginTop: -24 }}>
         
-        {/* DASHBOARD CARD (Intacto) */}
-        <div className="bg-card rounded-2xl shadow-sm p-4 mb-4 border border-border">
-          <div className="flex items-center justify-between mb-4 px-1">
+        {/* BUSCADOR MODULAR */}
+        <MenuSearch 
+          searchTerm={searchTerm} 
+          onSearchChange={setSearchTerm} 
+        />
+
+        {/* SELECTOR DE CATEGORÍAS */}
+        <CategorySelector 
+          activeCategory={activeCategory} 
+          onSelectCategory={(cat) => {
+            setActiveCategory(cat);
+            setSearchTerm(""); // Si cambia de categoría, le limpiamos lo que escribió
+          }} 
+        />
+
+        {/* EL MENÚ DINÁMICO */}
+        <div className="mt-8 mb-4 px-1">
+          
+          {/* BANNER DE CATEGORÍA ESTILO FIGMA */}
+          <div className="bg-[#FFF4EA] px-4 py-3 border border-[#FFE8CC] rounded-xl flex items-center justify-between mb-4 shadow-sm">
             <div className="flex items-center gap-2">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-              </span>
-              <span className="text-xs font-extrabold text-foreground uppercase tracking-wide">
-                Abierto ahora
-              </span>
+              <h2 className="font-bold text-[#1A1008] text-sm uppercase tracking-wider">
+                {activeCategory}
+              </h2>
+              {activeCategory === "Hamburguesas Artesanales" && (
+                <span className="text-[#FF5500] text-[10px] font-bold uppercase tracking-wide">
+                  (Salen con papas)
+                </span>
+              )}
             </div>
-            <span className="text-[10px] font-bold text-secondary-foreground bg-secondary px-2 py-1 rounded border border-border">
-              Cierra 23:00hs
+            <span className="bg-white text-[#FF5500] text-[11px] font-bold px-2.5 py-0.5 rounded-md border border-[#FFDAB9] shadow-sm">
+              {filteredProducts.length}
             </span>
           </div>
+          
+          {/* Le pasamos SOLO los productos filtrados al ProductList */}
+          <ProductList products={filteredProducts} />
 
-          <div className="relative">
-            <Search className="w-4 h-4 text-muted-foreground absolute left-3.5 top-3" />
-            <input 
-              type="text" 
-              placeholder="Buscar hamburguesas, promos..." 
-              className="w-full bg-background border border-border focus:border-primary focus:ring-1 focus:ring-primary rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground font-medium transition-all outline-none"
-            />
-          </div>
+          {/* Mensaje de error si la búsqueda no encuentra nada */}
+          {filteredProducts.length === 0 && (
+            <div className="bg-card rounded-2xl border border-border text-center py-16 px-4 shadow-sm mt-4">
+              <Search className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+              <p className="text-sm font-semibold text-muted-foreground">No encontramos productos con esa búsqueda.</p>
+            </div>
+          )}
         </div>
 
-        {/* 2. ACÁ OCURRE LA MAGIA: EL MENÚ DINÁMICO */}
-        <div className="mt-8 mb-4 px-1">
-          <h2 className="text-xl font-black text-foreground uppercase tracking-wider mb-4">
-            Nuestro Menú
-          </h2>
-          {/* Le pasamos el array de mockProducts al ProductList */}
-          <ProductList products={mockProducts} />
-        </div>
-<FloatingCart />
+        <FloatingCart />
       </main>
     </div>
   );

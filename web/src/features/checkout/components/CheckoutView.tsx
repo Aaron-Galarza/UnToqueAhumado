@@ -1,41 +1,64 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckCircle2, MessageCircle, ArrowLeft } from 'lucide-react';
 
+import { useCartStore } from '@/stores/cartStore';
 import { CartSummary } from '@/features/cart/components/CartSummary';
+import { CART_EXTRAS } from '@/features/cart/data/extras';
+import { CartItem } from '@/features/cart/types/cart';
 
 export function CheckoutView() {
   const router = useRouter();
 
-  const subtotalMock = 18800; 
-  
-  const cuponAplicadoMock = true; 
-  
-  // Si está aplicado, calcula el 10%, sino, es 0.
-  const discountMock = cuponAplicadoMock ? subtotalMock * 0.10 : 0; 
-  
-  const deliveryTypeMock = 'delivery';
-  
-  // Le decimos explícitamente a TypeScript que esto puede ser número o string
-  const deliveryFeeMock: number | string = "A convenir";
-  
-  const numericDeliveryFee = typeof deliveryFeeMock === 'number' ? deliveryFeeMock : 0;
-  const totalMock = subtotalMock - discountMock + numericDeliveryFee;
+  // 1. TRAEMOS TODO DESDE ZUSTAND
+  const items = useCartStore((state) => state.items);
+  const orderData = useCartStore((state) => state.orderData);
+  const clearCart = useCartStore((state) => state.clearCart);
 
+  // Si no hay datos (ej: el usuario recargó la página o entró directo), lo mandamos al inicio
+  useEffect(() => {
+    if (items.length === 0 || !orderData) {
+      router.push('/');
+    }
+  }, [items, orderData, router]);
+
+  if (!orderData) return null; 
+
+  // 2. MATEMÁTICA REAL
+  const itemTotal = (item: CartItem) => {
+    const adExtra = CART_EXTRAS.reduce((acc, a) => acc + (item.adicionales[a.id] || 0) * a.price, 0);
+    return (item.price + adExtra) * item.quantity;
+  };
+
+  const subtotal = items.reduce((acc, item) => acc + itemTotal(item), 0);
+  const discount = orderData.discountApplied ? subtotal * 0.10 : 0;
+  const deliveryFee: number | string = orderData.deliveryType === 'delivery' ? 'A convenir' : 0;
+  
+  const numericDeliveryFee = typeof deliveryFee === 'number' ? deliveryFee : 0;
+  const total = subtotal - discount + numericDeliveryFee;
+
+  // 3. ARMADO DEL WHATSAPP DINÁMICO
   const handleWhatsApp = () => {
-    const numeroDylan = "5493624522876"; // Número limpio, sin guiones ni símbolos de más
-    const mensaje = `¡Hola Un Toque Ahumado! 🍔🔥\n\nQuería confirmar mi pedido.\n\n*Total a pagar: $${totalMock.toLocaleString('es-AR')}*`;
+    const numeroDylan = "5493624522876"; 
     
-    // Usamos la variable numeroDylan para evitar cuentas matemáticas accidentales
+    const listaProductos = items.map(item => `- ${item.quantity}x ${item.name}`).join('\n');
+    const datosCliente = `Mis datos:\n- Nombre: ${orderData.name}\n- Teléfono: ${orderData.phone}\n- Envío: ${orderData.deliveryType === 'delivery' ? `Delivery a ${orderData.address}` : 'Retiro por el local'}`;
+
+    const mensaje = `¡Hola Un Toque Ahumado! 🍔🔥\n\nQuería confirmar mi pedido:\n\n${listaProductos}\n\n*Total a pagar: $${total.toLocaleString('es-AR')}*\n\n${datosCliente}`;
+    
     const url = `https://wa.me/${numeroDylan}?text=${encodeURIComponent(mensaje)}`;
+    
     window.open(url, '_blank');
+
+    // Vaciamos el carrito después de enviar y mandamos al inicio
+    clearCart();
+    router.push('/');
   };
 
   return (
     <div className="min-h-screen bg-background flex flex-col relative pb-10">
-      
       <header className="p-4 flex items-center absolute top-0 left-0 w-full z-10">
         <button 
           onClick={() => router.back()} 
@@ -46,7 +69,6 @@ export function CheckoutView() {
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center px-4 pt-20 max-w-lg mx-auto w-full">
-        
         <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6 animate-in zoom-in duration-500">
           <CheckCircle2 className="w-12 h-12 text-green-600" />
         </div>
@@ -56,20 +78,34 @@ export function CheckoutView() {
         </h1>
         
         <p className="text-muted-foreground text-center mb-8 font-medium">
-          Tu pedido fue realizado. Revisá el resumen y hacé clic en el botón verde para coordinar el envio por WhatsApp.
+          Hola, <strong>{orderData.name}</strong>. Revisá tu pedido y hacé clic en el botón verde para coordinar la entrega por WhatsApp.
         </p>
 
         <div className="w-full mb-8">
-          <h3 className="font-bold text-sm text-muted-foreground mb-3 uppercase tracking-wider pl-1">
-            Resumen final
-          </h3>
+          
+          {/* --- NUEVA SECCIÓN: LISTA DE PRODUCTOS --- */}
+          <div className="bg-card border-2 border-border rounded-2xl p-4 shadow-sm mb-4">
+            <h3 className="font-bold text-sm text-muted-foreground mb-3 uppercase tracking-wider">
+              Detalle del pedido
+            </h3>
+            <ul className="flex flex-col gap-2">
+              {items.map((item) => (
+                <li key={item.id} className="flex justify-between text-sm font-medium text-foreground border-b border-border/50 pb-2 last:border-0 last:pb-0">
+                  <span><span className="text-primary font-bold">{item.quantity}x</span> {item.name}</span>
+                  <span className="font-bold">${itemTotal(item).toLocaleString('es-AR')}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          {/* ----------------------------------------- */}
+
           <CartSummary 
-            subtotal={subtotalMock}
-            discount={discountMock}
-            deliveryFee={deliveryFeeMock}
-            total={totalMock}
-            discountApplied={cuponAplicadoMock} // <-- ACÁ LE PASAMOS EL INTERRUPTOR
-            deliveryType={deliveryTypeMock}
+            subtotal={subtotal}
+            discount={discount}
+            deliveryFee={deliveryFee}
+            total={total}
+            discountApplied={orderData.discountApplied}
+            deliveryType={orderData.deliveryType}
           />
         </div>
 
@@ -80,7 +116,6 @@ export function CheckoutView() {
           <MessageCircle className="w-6 h-6" />
           Confirmar por WhatsApp
         </button>
-
       </main>
     </div>
   );
