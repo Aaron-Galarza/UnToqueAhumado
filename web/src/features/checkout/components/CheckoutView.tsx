@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { CheckCircle2, MessageCircle, ArrowLeft } from 'lucide-react';
+import {Banknote, CreditCard, CheckCircle2, MessageCircle, ArrowLeft } from 'lucide-react';
 
 import { useCartStore } from '@/stores/cartStore';
 import { CartSummary } from '@/features/cart/components/CartSummary';
@@ -15,8 +15,8 @@ export function CheckoutView() {
   // 1. TRAEMOS TODO DESDE ZUSTAND
   const items = useCartStore((state) => state.items);
   const orderData = useCartStore((state) => state.orderData);
+  const setOrderData = useCartStore((state) => state.setOrderData);
   const clearCart = useCartStore((state) => state.clearCart);
-
   // Si no hay datos (ej: el usuario recargó la página o entró directo), lo mandamos al inicio
   useEffect(() => {
     if (items.length === 0 || !orderData) {
@@ -38,21 +38,30 @@ export function CheckoutView() {
   
   const numericDeliveryFee = typeof deliveryFee === 'number' ? deliveryFee : 0;
   const total = subtotal - discount + numericDeliveryFee;
-
-  // 3. ARMADO DEL WHATSAPP DINÁMICO
-  const handleWhatsApp = () => {
+  
+//ENVIAR EL PEDIDO A WSP
+ const handleWhatsApp = () => {
     const numeroDylan = "5493624522876"; 
     
-    const listaProductos = items.map(item => `- ${item.quantity}x ${item.name}`).join('\n');
+    const listaProductos = items.map(item => {
+      let texto = `- ${item.quantity}x ${item.name}`;
+      const extras = Object.entries(item.adicionales)
+        .filter(([_, qty]) => qty > 0)
+        .map(([id, qty]) => {
+          const extraDef = CART_EXTRAS.find(e => e.id === id);
+          return extraDef ? `\n   + ${qty}x ${extraDef.label}` : '';
+        }).join('');
+      return texto + extras;
+    }).join('\n');
+    // ----------------------------------------------------
+
     const datosCliente = `Mis datos:\n- Nombre: ${orderData.name}\n- Teléfono: ${orderData.phone}\n- Envío: ${orderData.deliveryType === 'delivery' ? `Delivery a ${orderData.address}` : 'Retiro por el local'}`;
 
-    const mensaje = `¡Hola Un Toque Ahumado! 🍔🔥\n\nQuería confirmar mi pedido:\n\n${listaProductos}\n\n*Total a pagar: $${total.toLocaleString('es-AR')}*\n\n${datosCliente}`;
+    const mensaje = `¡Hola Un Toque Ahumado! 🍔🔥\n\nQuería confirmar mi pedido:\n\n${listaProductos}\n\n*Total a pagar: $${total.toLocaleString('es-AR')}*\n*Método de pago: ${orderData.paymentMethod}*\n\n${datosCliente}`;
     
     const url = `https://wa.me/${numeroDylan}?text=${encodeURIComponent(mensaje)}`;
-    
     window.open(url, '_blank');
 
-    // Vaciamos el carrito después de enviar y mandamos al inicio
     clearCart();
     router.push('/');
   };

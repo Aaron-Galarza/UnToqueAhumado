@@ -9,24 +9,35 @@ export interface OrderData {
   address: string;
   deliveryType: 'takeaway' | 'delivery';
   discountApplied: boolean;
+  paymentMethod: 'Efectivo' | 'Transferencia';
 }
 
 interface CartState {
   items: CartItem[];
-  orderData: OrderData | null; // <--- NUEVO: Para guardar los datos del cliente
+  orderData: OrderData; // <--- LE SACAMOS EL NULL
   addItem: (item: CartItem) => void;
   removeItem: (id: number) => void;
   updateQuantity: (id: number, delta: number) => void;
   updateAdicional: (itemId: number, adId: string, delta: number) => void;
-  setOrderData: (data: OrderData) => void; // <--- NUEVO: Para guardar la info antes del checkout
+  setOrderData: (data: OrderData) => void;
   clearCart: () => void;
 }
+
+// Valores por defecto para que arranque limpio
+const initialOrderData: OrderData = {
+  name: '',
+  phone: '',
+  address: '',
+  deliveryType: 'takeaway',
+  discountApplied: false,
+  paymentMethod: 'Efectivo',
+};
 
 export const useCartStore = create<CartState>()(
   persist(
     (set) => ({
       items: [],
-      orderData: null, // Arranca sin datos del cliente
+      orderData: initialOrderData,
 
       addItem: (newItem) => set((state) => {
         const existingItemIndex = state.items.findIndex(
@@ -63,8 +74,7 @@ export const useCartStore = create<CartState>()(
 
       setOrderData: (data) => set({ orderData: data }),
 
-      // Modificamos clearCart para que también borre los datos del cliente
-      clearCart: () => set({ items: [], orderData: null }), 
+      clearCart: () => set({ items: [], orderData: initialOrderData }), 
     }),
     {
       name: 'cart-storage',

@@ -1,109 +1,29 @@
 "use client";
 
-import React, { useState } from 'react';
-// Agregamos el ícono Trash2
+import React from 'react';
 import { ArrowLeft, Trash2 } from 'lucide-react'; 
-import { useRouter } from 'next/navigation';
 
-// Zustand
-import { useCartStore } from '@/stores/cartStore';
+// Importamos nuestro cerebro
+import { useCartLogic } from '@/features/cart/hooks/useCartLogic';
 
-import { CartItem } from '@/features/cart/types/cart';
-import { CART_EXTRAS } from '@/features/cart/data/extras';
+// Componentes Visuales
 import { CartItemCard } from '@/features/cart/components/CartItemCard';
 import { DeliverySelector } from '@/features/cart/components/DeliverySelector';
 import { CustomerForm } from '@/features/cart/components/CustomerForm';
 import { CouponInput } from '@/features/cart/components/CouponInput';
 import { CartSummary } from '@/features/cart/components/CartSummary';
 import { ConfirmButton } from '@/features/cart/components/ConfirmButton';
+import { PaymentSelector } from '@/features/cart/components/PaymentSelector';
 
 export default function CartPage() {
-  const router = useRouter();
+  const {
+    cartItems, paymentMethod, setPaymentMethod, deliveryType, setDeliveryType,
+    promoCode, setPromoCode, discountApplied, customerData, formErrors,
+    subtotal, discount, deliveryFee, total, handleRemoveItem, updateMainQuantity, 
+    setAdicional, handleApplyPromo, handleCustomerDataChange, handleClearCart, 
+    handleConfirmOrder, router
+  } = useCartLogic();
 
-  // 1. CONEXIÓN CON ZUSTAND: Traemos la función clearCart
-  const cartItems = useCartStore((state) => state.items);
-  const handleRemoveItem = useCartStore((state) => state.removeItem);
-  const updateMainQuantity = useCartStore((state) => state.updateQuantity);
-  const setAdicional = useCartStore((state) => state.updateAdicional);
-  const clearCart = useCartStore((state) => state.clearCart);
-
-  // 2. ESTADOS LOCALES
-  const [deliveryType, setDeliveryType] = useState<'takeaway' | 'delivery'>('takeaway');
-  const [promoCode, setPromoCode] = useState('');
-  const [discountApplied, setDiscountApplied] = useState(false);
-  const [customerData, setCustomerData] = useState({ name: '', phone: '', address: '' });
-  const [formErrors, setFormErrors] = useState({ name: '', phone: '', address: '' });
-  const setOrderData = useCartStore((state) => state.setOrderData);
-  // 3. CÁLCULOS
-  const itemTotal = (item: CartItem) => {
-    const adExtra = CART_EXTRAS.reduce((acc, a) => acc + (item.adicionales[a.id] || 0) * a.price, 0);
-    return (item.price + adExtra) * item.quantity;
-  };
-
-  const subtotal = cartItems.reduce((acc, item) => acc + itemTotal(item), 0);
-  const discount = discountApplied ? subtotal * 0.10 : 0;
-  const deliveryFee = deliveryType === 'delivery' ? 'a convenir' : 0;
-  const total = subtotal - discount + (typeof deliveryFee === 'number' ? deliveryFee : 0);
-
-  // 4. HANDLERS
-  const handleApplyPromo = () => {
-    if (promoCode.toUpperCase() === 'SMASHTIKTOK') {
-      setDiscountApplied(true);
-    } else {
-      alert("El código ingresado no es válido o está vencido.");
-      setDiscountApplied(false);
-      setPromoCode(''); 
-    }
-  };
-
-  const handleCustomerDataChange = (field: keyof typeof customerData, value: string) => {
-    setCustomerData(prev => ({ ...prev, [field]: value }));
-    if (formErrors[field]) setFormErrors(prev => ({ ...prev, [field]: '' }));
-  };
-
-  // Función para vaciar el carrito con confirmación
-  const handleClearCart = () => {
-    if (window.confirm('¿Estás seguro que querés vaciar todo el carrito?')) {
-      clearCart();
-    }
-  };
-
-  const handleConfirmOrder = () => {
-    let isValid = true;
-    const newErrors = { name: '', phone: '', address: '' };
-
-    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
-    if (customerData.name.trim().length < 3) {
-      newErrors.name = 'Mínimo 3 letras.'; isValid = false;
-    } else if (!nameRegex.test(customerData.name)) {
-      newErrors.name = 'Solo letras.'; isValid = false;
-    }
-
-    const phoneRegex = /^\+?[0-9]{8,15}$/;
-    if (!phoneRegex.test(customerData.phone.replace(/\s/g, ''))) {
-      newErrors.phone = 'Celular inválido.'; isValid = false;
-    }
-
-    if (deliveryType === 'delivery' && customerData.address.trim().length < 5) {
-      newErrors.address = 'Dirección muy corta.'; isValid = false;
-    }
-
-    if (!isValid) {
-      setFormErrors(newErrors);
-      window.scrollTo({ top: 300, behavior: 'smooth' });
-      return; 
-    }
-  setOrderData({
-      name: customerData.name,
-      phone: customerData.phone,
-      address: customerData.address,
-      deliveryType: deliveryType,
-      discountApplied: discountApplied,
-    });
-    router.push('/checkout');
-  };
-
-  // --- RENDERIZADO ---
   return (
     <div className="min-h-screen bg-background pb-10">
       <header className="bg-card border-b border-border p-3 md:p-4 sticky top-0 z-50 flex items-center gap-4 shadow-sm">
@@ -119,17 +39,10 @@ export default function CartPage() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 pt-6">
-        
-        {/* LISTA DE PRODUCTOS */}
         <div className="flex flex-col gap-4 mb-8">
-          
-          {/* Botón de vaciar carrito (Solo se muestra si hay cosas) */}
           {cartItems.length > 0 && (
             <div className="flex justify-end -mb-2">
-              <button 
-                onClick={handleClearCart} 
-                className="text-sm font-bold text-muted-foreground hover:text-red-500 transition-colors flex items-center gap-1.5 cursor-pointer"
-              >
+              <button onClick={handleClearCart} className="text-sm font-bold text-muted-foreground hover:text-red-500 transition-colors flex items-center gap-1.5 cursor-pointer">
                 <Trash2 className="w-4 h-4" /> Vaciar carrito
               </button>
             </div>
@@ -141,6 +54,7 @@ export default function CartPage() {
               onUpdateQuantity={updateMainQuantity} onRemoveItem={handleRemoveItem} onUpdateAdicional={setAdicional}
             />
           ))}
+          
           {cartItems.length === 0 && (
             <div className="text-center py-12 bg-card border border-border rounded-2xl shadow-sm">
               <p className="font-semibold text-lg text-muted-foreground">Tu carrito está vacío</p>
@@ -158,7 +72,9 @@ export default function CartPage() {
 
             <h2 className="font-['Bebas_Neue'] text-2xl tracking-wide text-foreground mb-3">Tus datos</h2>
             <CustomerForm deliveryType={deliveryType} data={customerData} onChange={handleCustomerDataChange} errors={formErrors} />
-
+            
+            <PaymentSelector paymentMethod={paymentMethod} onChange={setPaymentMethod} />
+            
             <CouponInput promoCode={promoCode} setPromoCode={setPromoCode} onApply={handleApplyPromo} discountApplied={discountApplied} />
 
             <CartSummary subtotal={subtotal} discount={discount} deliveryFee={deliveryFee} total={total} discountApplied={discountApplied} deliveryType={deliveryType} />
