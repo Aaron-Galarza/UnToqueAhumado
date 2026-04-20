@@ -1,31 +1,40 @@
 import { Request, Response } from 'express';
 import * as OrderService from './orders.service';
+import { sendError, sendSucces } from '../../utils/response';
 
+
+// Controlador para crear pedido
 export const createOrder = (req: Request, res: Response) => {
   try {
-    const { customer, items, deliveryType } = req.body;
+    const { customer, items, deliveryType, arbol } = req.body;
 
-    // Validación manual simple
+    // Validaciones clasicas:
+
     if (!customer?.name || !customer?.phone) {
-      return res.status(400).json({ message: 'Nombre y teléfono del cliente son requeridos' });
+      return sendError(res, 'Nombre y teléfono del cliente son requeridos')
     }
 
     if (!items || items.length === 0) {
-      return res.status(400).json({ message: 'El carrito no puede estar vacío' });
+      return sendError(res, 'El carrito no puede estar vacío')
     }
 
     if (!deliveryType) {
-      return res.status(400).json({ message: 'Debes seleccionar el tipo de entrega (pickup o delivery)' });
+      return sendError(res, 'Debes seleccionar el tipo de entrega (pickup o delivery)')
     }
 
     const order = OrderService.createOrder(req.body);
-    res.status(201).json({ success: true, order });
+    return sendSucces(res, order, 201) // <<--- Si todo sale bien manda el pedido ggwp ez jg
   } catch (error) {
-    res.status(500).json({ message: 'Error al procesar el pedido' });
+    return sendError(res, 'Error al procesar el pedido', 500)
   }
 };
 
+//Controlador para obtener todos los pedidos
 export const getOrders = (req: Request, res: Response) => {
-  const orders = OrderService.getAllOrders();
-  res.json(orders);
+  try {
+    const orders = OrderService.getAllOrders()
+    return sendSucces(res, orders, 200)
+  } catch (error) {
+    sendError(res, 'Error al obtener pedidos', 500)
+  }
 };

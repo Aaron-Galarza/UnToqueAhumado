@@ -4,8 +4,8 @@ import orderRoutes from '../modules/orders/orders.routes'; // Importar
 
 const router = Router();
 
-router.use('/products', productRoutes);
-router.use('/orders', orderRoutes); // Registrar
+router.use('/productos', productRoutes);
+router.use('/orders', orderRoutes);
 
 router.get('/health', (req, res) => {
   res.json({ status: 'API is running', timestamp: new Date() });
