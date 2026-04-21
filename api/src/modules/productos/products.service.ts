@@ -32,22 +32,22 @@ const products: Product[] = [
 ];
 
 // Servicio para obtener todos los productos (admin)
-export const getAllProducts = (): Product[] => {
+export const viewAll = (): Product[] => {
   return products;
 };
 
 // Servicio para obtener todos los productos ACTIVOS (publico)
-export const getActiveProducts = (): Product[] => {
+export const viewActive = (): Product[] => {
  return products.filter(p => p.active)
 }
 
 // Servicio para obtener un producto por ID
-export const getProductsByID = (id: string): Product | undefined => {
+export const viewById = (id: string): Product | undefined => {
   return products.find(p => p.id === id)
 }
 
 // Servicio para crear un nuevo producto (ADMIN)
-export const createProducto = (data: Omit<Product, 'id' | 'active'>): Product => {
+export const create = (data: Omit<Product, 'id' | 'active'>): Product => {
 
   const newProduct: Product = {
     ...data,
@@ -60,7 +60,7 @@ export const createProducto = (data: Omit<Product, 'id' | 'active'>): Product =>
 }
 
 // Servicio para Actualizar un producto (ADMIN)
-export const updateProducto = (id: string, data: Partial<Product>): Product | null => {
+export const modify = (id: string, data: Partial<Product>): Product | null => {
   const index = products.findIndex(p => p.id === id)
   if (index === -1) return null
 
@@ -81,11 +81,20 @@ export const updateProducto = (id: string, data: Partial<Product>): Product | nu
 }
 
 // Servicio para Activar/Desactivar un Producto
-export const activeStatusProduct = (id: string) => {
+export const toggleActive = (id: string) => {
   const index = products.findIndex(p => p.id === id)
   if (index === -1) return null
 
   products[index].active = !products[index].active
   return products[index]
 
+}
+
+// Servicio para eliminar un producto permanentemente
+export const deleteById = (id: string) => {
+  const index = products.findIndex(p => p.id === id)
+  if (index === -1) return null
+
+  products.splice(index, 1)
+  return true
 }

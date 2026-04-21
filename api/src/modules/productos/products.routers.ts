@@ -4,10 +4,11 @@ import * as ProductController from './products.controller'
 const router = Router()
 
 router.get('/', ProductController.getActiveProducts)
-router.get('/allProducts', ProductController.getProducts)
-router.post('/newProduct', ProductController.createNewProduct)
-router.put('/updateProduct/:id', ProductController.updateProduct)
-router.put('/activeChangeProduct/:id', ProductController.activeStatusProduct)
+router.get('/admin', ProductController.getProducts)
+router.post('/admin', ProductController.createNewProduct)
+router.put('/admin/:id', ProductController.updateProduct)
+router.put('/admin/toggleActive/:id', ProductController.activeStatusProduct)
+router.delete('/admin/:id', ProductController.deleteProduct)
 
 
 export default router

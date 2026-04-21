@@ -6,7 +6,7 @@ import { sendError, sendSucces } from '../../utils/response'
 export const getProducts = async (req: Request, res: Response) => { 
 
     try {
-        const products = ProductService.getAllProducts()
+        const products = ProductService.viewAll()
         return sendSucces(res, products) // <<---Si funciona tira los todos los productos
     } catch (error) {
         return sendError(res, 'Error al obtener los productos', 500)
@@ -16,7 +16,7 @@ export const getProducts = async (req: Request, res: Response) => {
 //controlador para obtener todo los productos ACTIVOS (publico)
 export const getActiveProducts = async (req: Request, res: Response) => {
     try {
-        const productos = ProductService.getActiveProducts()
+        const productos = ProductService.viewActive()
         return sendSucces(res, productos)
     } catch (error) {
         return sendError(res, 'Error al obtener los productos', 500)
@@ -38,7 +38,7 @@ export const createNewProduct = async (req: Request, res: Response) => {
 
         if (!description) return sendError(res, 'Descripcion del Producto es obligatoria')
 
-        const newProduct = ProductService.createProducto(req.body)
+        const newProduct = ProductService.create(req.body)
         return sendSucces(res, newProduct, 201)
     } catch (error) {
         return sendError(res, 'Error al cargar el producto', 500)
@@ -52,7 +52,7 @@ export const updateProduct = async (req: Request, res: Response) => {
 
         if (!id) return sendError(res, 'Se necesita un id para actualizar un producto')
     
-        const update = ProductService.updateProducto(id as string, req.body)
+        const update = ProductService.modify(id as string, req.body)
 
         return sendSucces(res, update, 200)
     } catch (error) {
@@ -63,9 +63,20 @@ export const updateProduct = async (req: Request, res: Response) => {
 export const activeStatusProduct = async (req: Request, res: Response) => {
     try {
         const { id } = req.params
-        const product = ProductService.activeStatusProduct(id as string)
+        const product = ProductService.toggleActive(id as string)
         return sendSucces(res, product, 200)
     } catch (error) {
         return sendError(res, 'Error al activar / desactivar producto')
+    }
+}
+
+export const deleteProduct = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params
+
+        const result = ProductService.deleteById(id as string)
+        return sendSucces(res, result)
+    } catch (error) {
+        return sendError(res, 'Error al borrar producto')
     }
 }
