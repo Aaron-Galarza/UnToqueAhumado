@@ -6,6 +6,7 @@ export interface CartItem {
 }
 
 export type OrderStatus = 'pending' | 'in-preparation' | 'ready' | 'delivered';
+export const validOrderStatus: OrderStatus[] = ['pending', 'in-preparation', 'ready', 'delivered']
 
 export interface Order {
   id: string;

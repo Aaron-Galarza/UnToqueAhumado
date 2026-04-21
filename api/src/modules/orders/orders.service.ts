@@ -38,3 +38,14 @@ export const createOrder = (orderData: Omit<Order, 'id' | 'status' | 'createdAt'
 export const getAllOrders = (): Order[] => {
   return orders;
 };
+
+// Servicio para Actualizar un producto (ADMIN)
+export const update = (id: string, newStatus: OrderStatus): Order | null => {
+  const index = orders.findIndex(p => p.id === id)
+  if (index === -1) return null
+  orders[index].status = newStatus
+
+  return orders[index]
+}
+
+//export const

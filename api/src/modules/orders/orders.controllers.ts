@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import * as OrderService from './orders.service';
 import { sendError, sendSucces } from '../../utils/response';
-
+import { validOrderStatus, OrderStatus} from '../orders/orders.model'
 
 // Controlador para crear pedido
 export const createOrder = (req: Request, res: Response) => {
@@ -38,3 +38,18 @@ export const getOrders = (req: Request, res: Response) => {
     sendError(res, 'Error al obtener pedidos', 500)
   }
 };
+
+export const updateStatusOrder = (req: Request, res: Response) => {
+  try {
+    const { id } = req.params
+    const { status } = req.body
+
+    if (!validOrderStatus.includes(status as OrderStatus)) return sendError(res, 'Estado no valido para la orden')
+
+    const order = OrderService.update(id as string, status)
+    return sendSucces(res, order, 200)
+    
+  } catch (error) {
+    sendError(res, 'Error al actualizar el estado de la orden')
+  }
+}
