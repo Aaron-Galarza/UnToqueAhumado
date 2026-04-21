@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { DollarSign, Banknote, CreditCard, ShoppingBag, Award } from 'lucide-react';
 
 type FilterType = 'hoy' | 'semana' | 'mes';
 
-// Usamos tus datos de prueba (El día de mañana esto se puede calcular leyendo Zustand o el Backend real)
+// Aaron: esto es mock para el dashboard. Cuando conectes el backend, idealmente devolvemos este mismo shape (hoy/semana/mes) y el componente ni se entera.
 const mockStats = {
   hoy: { total: 350000, efectivo: 120000, trans: 230000, entregados: 45, top: 'Doble Smash Clásica' },
   semana: { total: 2150000, efectivo: 850000, trans: 1300000, entregados: 312, top: 'Bacon Ahumada' },
@@ -23,7 +23,7 @@ export function AnalyticsPanel() {
       {/* Header con Filtro */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#FFF9F5] p-4 rounded-xl border border-[#FFE8D9] shadow-sm">
         <h2 className="text-xl md:text-2xl text-gray-900 tracking-wide flex items-center gap-2 font-['Bebas_Neue']">
-          <DollarSign className="w-5 h-5 md:w-6 md:h-6 text-[#FF5500]" />
+          <DollarSign className="w-5 h-5 md:w-6 md:h-6 text-primary" />
           Métricas de Negocio
         </h2>
         <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -31,7 +31,7 @@ export function AnalyticsPanel() {
           <select 
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value as FilterType)}
-            className="w-full sm:w-auto bg-white border border-[#FFE8D9] text-gray-900 text-sm rounded-lg px-4 py-2 outline-none focus:border-[#FF5500] cursor-pointer"
+            className="w-full sm:w-auto bg-white border border-[#FFE8D9] text-gray-900 text-sm rounded-lg px-4 py-2 outline-none focus:border-primary cursor-pointer"
           >
             <option value="hoy">Hoy</option>
             <option value="semana">Esta Semana</option>
@@ -44,7 +44,7 @@ export function AnalyticsPanel() {
       <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         
         {/* Total */}
-        <div className="bg-[#FFF9F5] rounded-xl p-5 border border-[#FFE8D9] shadow-sm hover:border-[#FF5500]/50 transition-colors">
+        <div className="bg-[#FFF9F5] rounded-xl p-5 border border-[#FFE8D9] shadow-sm hover:border-primary/50 transition-colors">
           <p className="text-xs text-gray-500 mb-1 font-bold uppercase tracking-wider">Ventas Totales</p>
           <p className="text-2xl md:text-3xl text-gray-900 font-bold">${currentStats.total.toLocaleString('es-AR')}</p>
         </div>

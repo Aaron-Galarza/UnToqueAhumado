@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+// Aaron: este store es un "mock" para el panel admin (persistido en localStorage). Cuando el backend esté listo, la idea es mantener estas interfaces y reemplazar las acciones por llamadas al API.
+
 // 1. TUS INTERFACES
 export interface Order {
   id: string;

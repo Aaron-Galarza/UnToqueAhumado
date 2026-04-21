@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { CartItem } from '@/features/cart/types/cart';
 
+// Aaron: este store persiste el carrito en el cliente. Si más adelante el backend maneja carrito por usuario, acá lo usamos como cache y sincronizamos.
+
 // Definimos el formato de los datos del pedido
 export interface OrderData {
   name: string;
@@ -14,7 +16,7 @@ export interface OrderData {
 
 interface CartState {
   items: CartItem[];
-  orderData: OrderData; // <--- LE SACAMOS EL NULL
+  orderData: OrderData; // Siempre arranca con valores por defecto para evitar null-checks en la UI.
   addItem: (item: CartItem) => void;
   removeItem: (id: number) => void;
   updateQuantity: (id: number, delta: number) => void;

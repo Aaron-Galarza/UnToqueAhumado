@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { Search } from "lucide-react";
 
 interface MenuSearchProps {
@@ -26,14 +25,14 @@ export function MenuSearch({ searchTerm, onSearchChange }: MenuSearchProps) {
       </div>
 
       {/* Input de búsqueda */}
-      <div className="relative">
-        <Search className="w-4 h-4 text-muted-foreground absolute left-3.5 top-3.5" />
+      <div className="flex items-center gap-2 w-full bg-background border border-border hover:border-primary/50 rounded-xl px-4 py-3 transition-all focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
+        <Search className="w-4 h-4 text-muted-foreground shrink-0" />
         <input 
           type="text" 
           placeholder="Buscar hamburguesas, promos..." 
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full bg-background border border-border hover:border-primary/50 focus:border-primary focus:ring-1 focus:ring-primary rounded-xl pl-10 pr-4 py-3 text-sm text-foreground font-medium transition-all outline-none"
+          className="flex-1 bg-transparent text-sm text-foreground font-medium outline-none min-w-0"
         />
       </div>
     </div>

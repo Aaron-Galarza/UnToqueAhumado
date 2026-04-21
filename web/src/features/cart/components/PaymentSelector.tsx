@@ -1,4 +1,3 @@
-import React from 'react';
 import { Banknote, CreditCard } from 'lucide-react';
 
 interface PaymentSelectorProps {

@@ -15,6 +15,7 @@ export function useCartLogic() {
   const setAdicional = useCartStore((state) => state.updateAdicional);
   const clearCart = useCartStore((state) => state.clearCart);
   const setOrderData = useCartStore((state) => state.setOrderData);
+  // Aaron: esto hoy "duplica" el pedido en el panel admin (modo demo). Con backend real debería ser un POST y el admin leer desde API.
   const addOrderToAdmin = useAdminStore((state) => state.addOrder); 
 
   // 2. ESTADOS LOCALES
@@ -94,9 +95,9 @@ export function useCartLogic() {
     });
 
     const detalleProductos = cartItems.map(item => {
-      let texto = `${item.quantity}x ${item.name}`;
+      const texto = `${item.quantity}x ${item.name}`;
       const extras = Object.entries(item.adicionales)
-        .filter(([_, qty]) => qty > 0)
+        .filter(([, qty]) => qty > 0)
         .map(([id, qty]) => {
           const extraDef = CART_EXTRAS.find(e => e.id === id);
           return extraDef ? `\n  + ${qty}x ${extraDef.label}` : '';

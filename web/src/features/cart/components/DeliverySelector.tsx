@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { Store, Bike } from "lucide-react";
 
 interface DeliverySelectorProps {

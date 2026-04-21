@@ -1,6 +1,4 @@
 "use client";
-
-import React from "react";
 import { Tag } from "lucide-react";
 
 interface CouponInputProps {

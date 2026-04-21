@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import {Banknote, CreditCard, CheckCircle2, MessageCircle, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, MessageCircle, ArrowLeft } from 'lucide-react';
 
 import { useCartStore } from '@/stores/cartStore';
 import { CartSummary } from '@/features/cart/components/CartSummary';
@@ -15,7 +15,6 @@ export function CheckoutView() {
   // 1. TRAEMOS TODO DESDE ZUSTAND
   const items = useCartStore((state) => state.items);
   const orderData = useCartStore((state) => state.orderData);
-  const setOrderData = useCartStore((state) => state.setOrderData);
   const clearCart = useCartStore((state) => state.clearCart);
   // Si no hay datos (ej: el usuario recargó la página o entró directo), lo mandamos al inicio
   useEffect(() => {
@@ -39,14 +38,14 @@ export function CheckoutView() {
   const numericDeliveryFee = typeof deliveryFee === 'number' ? deliveryFee : 0;
   const total = subtotal - discount + numericDeliveryFee;
   
-//ENVIAR EL PEDIDO A WSP
- const handleWhatsApp = () => {
-    const numeroDylan = "5493624522876"; 
+  // Aaron: por ahora confirmamos por WhatsApp (sin backend de órdenes). Cuando conectes el endpoint, este paso debería crear la orden primero y después confirmar.
+  const handleWhatsApp = () => {
+    const storeWhatsAppNumber = "5493624522876"; 
     
     const listaProductos = items.map(item => {
-      let texto = `- ${item.quantity}x ${item.name}`;
+      const texto = `- ${item.quantity}x ${item.name}`;
       const extras = Object.entries(item.adicionales)
-        .filter(([_, qty]) => qty > 0)
+        .filter(([, qty]) => qty > 0)
         .map(([id, qty]) => {
           const extraDef = CART_EXTRAS.find(e => e.id === id);
           return extraDef ? `\n   + ${qty}x ${extraDef.label}` : '';
@@ -59,7 +58,7 @@ export function CheckoutView() {
 
     const mensaje = `¡Hola Un Toque Ahumado! 🍔🔥\n\nQuería confirmar mi pedido:\n\n${listaProductos}\n\n*Total a pagar: $${total.toLocaleString('es-AR')}*\n*Método de pago: ${orderData.paymentMethod}*\n\n${datosCliente}`;
     
-    const url = `https://wa.me/${numeroDylan}?text=${encodeURIComponent(mensaje)}`;
+    const url = `https://wa.me/${storeWhatsAppNumber}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
 
     clearCart();

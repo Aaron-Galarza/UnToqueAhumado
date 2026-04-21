@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { Plus, Minus } from "lucide-react";
 import { CART_EXTRAS } from "../data/extras";
 

@@ -17,6 +17,8 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState("Hamburguesas Artesanales");
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Aaron: hoy el menú sale de `mockProducts`. Cuando conectes el backend, lo ideal es mantener el mismo shape y este filtro puede vivir acá o del lado del API.
+
   // --- FUNCIÓN MÁGICA PARA LIMPIAR ACENTOS ---
   const removeAccents = (str: string) => {
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -38,17 +40,14 @@ export default function Home() {
     <div className="min-h-screen bg-background flex flex-col relative pb-10">
       
       {/* HERO SECTION (Tu foto de fondo intacta) */}
-      <section 
-        className="w-full relative rounded-b-[2.5rem] shadow-md z-10 flex flex-col items-center justify-center pt-12 pb-16 bg-cover bg-center"
-        style={{
-          backgroundImage: ` url('https://lavozdelosbarrios.com/wp-content/uploads/2025/04/Milei-925x535.jpg')`
-        }}
+      <section
+        className="w-full relative rounded-b-[2.5rem] shadow-md z-10 flex flex-col items-center justify-center pt-12 pb-16 bg-cover bg-center bg-[url('https://lavozdelosbarrios.com/wp-content/uploads/2025/04/Milei-925x535.jpg')]"
       >
         <div className="w-24 h-24 rounded-full border-[3px] border-white/90 bg-white shadow-xl flex items-center justify-center overflow-hidden mb-4">
           <img 
             src="https://res.cloudinary.com/dwqxdensk/image/upload/v1774491741/image_so7u3x.png" 
             alt="Un Toque Ahumado" 
-            className="w-[85%] h-[85%] object-contain"
+            className="w-5/6 h-5/6 object-contain"
           />
         </div>
         <h1 className="text-center relative z-10 leading-none font-bold text-white tracking-widest text-4xl md:text-5xl">
@@ -61,7 +60,7 @@ export default function Home() {
       </section>
 
       {/* CONTENEDOR PRINCIPAL */}
-      <main className="flex-1 w-full max-w-3xl mx-auto px-4 relative z-20" style={{ marginTop: -24 }}>
+      <main className="flex-1 w-full max-w-3xl mx-auto px-4 relative z-20 -mt-6">
         
         {/* BUSCADOR MODULAR */}
         <MenuSearch 
@@ -82,18 +81,18 @@ export default function Home() {
         <div className="mt-8 mb-4 px-1">
           
           {/* BANNER DE CATEGORÍA ESTILO FIGMA */}
-          <div className="bg-[#FFF4EA] px-4 py-3 border border-[#FFE8CC] rounded-xl flex items-center justify-between mb-4 shadow-sm">
+          <div className="bg-secondary px-4 py-3 border border-border rounded-xl flex items-center justify-between mb-4 shadow-sm">
             <div className="flex items-center gap-2">
-              <h2 className="font-bold text-[#1A1008] text-sm uppercase tracking-wider">
+              <h2 className="font-bold text-foreground text-sm uppercase tracking-wider">
                 {activeCategory}
               </h2>
               {activeCategory === "Hamburguesas Artesanales" && (
-                <span className="text-[#FF5500] text-[10px] font-bold uppercase tracking-wide">
+                <span className="text-primary text-[10px] font-bold uppercase tracking-wide">
                   (Salen con papas)
                 </span>
               )}
             </div>
-            <span className="bg-white text-[#FF5500] text-[11px] font-bold px-2.5 py-0.5 rounded-md border border-[#FFDAB9] shadow-sm">
+            <span className="bg-white text-primary text-[11px] font-bold px-2.5 py-0.5 rounded-md border border-[#FFDAB9] shadow-sm">
               {filteredProducts.length}
             </span>
           </div>

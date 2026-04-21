@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { Plus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Product } from "../types/product";
@@ -15,6 +14,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem);
 
   const handleAddToCart = () => {
+    // Aaron: este payload es el "contrato" con el carrito. Si el backend manda otra estructura, conviene adaptarla antes de llegar acá.
     // Armamos el "paquete" con el formato exacto que pide el Carrito
     addItem({
       id: product.id,
@@ -45,7 +45,7 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
 
       {/* Lado Derecho: Imagen y Botón */}
-      <div className="relative w-[90px] h-[90px] md:w-28 md:h-28 shrink-0">
+      <div className="relative w-24 h-24 md:w-28 md:h-28 shrink-0">
         <img 
           src={product.image} 
           alt={product.title} 

@@ -1,12 +1,11 @@
 "use client";
 
-import React from 'react';
 import { AdminHeader } from '@/features/admin/AdminHeader';
 import { AnalyticsPanel } from '@/features/admin/analytics/components/AnalyticsPanel';
-// 1. Importamos el Panel de Pedidos
+// Aaron: este dashboard por ahora es 100% UI + Zustand. Cuando sumes auth/roles, este es el entrypoint para proteger el acceso.
 import { OrdersPanel } from '@/features/admin/orders/components/OrdersPanel';
 import { CouponsPanel } from '@/features/admin/cupones/components/CouponsPanel';
-import {ProductsPanel} from '@/features/admin/products/components/ProductsPanel';
+import { ProductsPanel } from '@/features/admin/products/components/ProductsPanel';
 
 export default function AdminDashboard() {
   return (
@@ -41,7 +40,7 @@ export default function AdminDashboard() {
         }
         .custom-scrollbar::-webkit-scrollbar-track { background: #F5F5F5; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #FF5500; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--primary); }
       `}</style>
     </div>
   );

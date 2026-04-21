@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Trash2, Plus, Minus } from "lucide-react";
 import { CartItem } from "../types/cart";
 import { canHaveExtras, CART_EXTRAS } from "../data/extras";

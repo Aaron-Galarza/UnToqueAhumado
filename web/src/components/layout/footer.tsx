@@ -1,5 +1,3 @@
-import React from 'react';
-
 export function Footer() {
   return (
     <footer className="bg-secondary border-t border-border py-4 md:py-6 relative z-10">

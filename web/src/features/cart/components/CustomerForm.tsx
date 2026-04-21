@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { User, Phone, MapPin } from "lucide-react";
 
 export interface CustomerData {

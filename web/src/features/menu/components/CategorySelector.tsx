@@ -1,7 +1,6 @@
 "use client";
 
-import React from "react";
-
+// Aaron: estas categorías están hardcodeadas a propósito. Si mañana salen de un endpoint, solo cambiamos este array y el resto del componente sigue igual.
 const BurgerIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M4 10.5C4 9.4 4.9 8.5 6 8.5H18C19.1 8.5 20 9.4 20 10.5V11.5H4V10.5Z" fill="currentColor"/>
@@ -52,7 +51,7 @@ export function CategorySelector({ activeCategory, onSelectCategory }: CategoryS
         <button
           key={c.name}
           onClick={() => onSelectCategory(c.name)}
-          className={`snap-center flex flex-col items-center w-[84px] md:w-[100px] shrink-0 gap-2 transition-all duration-300 ${
+          className={`snap-center flex flex-col items-center w-20 md:w-24 shrink-0 gap-2 transition-all duration-300 ${
             activeCategory === c.name ? 'text-primary scale-105' : 'text-muted-foreground hover:text-foreground'
           }`}
         >

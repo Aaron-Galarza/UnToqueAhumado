@@ -1,8 +1,7 @@
 "use client";
 
-import React from 'react';
 import { Clock, MessageCircle, Banknote, CreditCard, Trash2 } from 'lucide-react';
-// Importamos el cerebro y la interfaz del pedido
+// Aaron: este panel hoy consume pedidos desde Zustand (y los persiste). Cuando conectes el backend, la idea es que el store sea solo un wrapper del API.
 import { useAdminStore, Order } from '@/stores/adminStore';
 
 const STATUS_COLORS = {
@@ -12,17 +11,17 @@ const STATUS_COLORS = {
 };
 
 export function OrdersPanel() {
-  // 1. CONECTAMOS CON ZUSTAND
+  // Aaron: las 3 acciones del store (update/delete) hoy son instantáneas. Con backend real deberían manejar loading/error y refrescar el listado.
   const orders = useAdminStore((state) => state.orders);
   const updateOrderStatus = useAdminStore((state) => state.updateOrderStatus);
   const deleteOrder = useAdminStore((state) => state.deleteOrder);
 
-  // 2. CALCULAMOS LOS CONTADORES EN VIVO
+  // Aaron: estos contadores son derivados del estado. Si más adelante vienen del backend, podés mandarlos ya agregados y evitamos recalcular.
   const countPendientes = orders.filter(o => o.status === 'Pendiente').length;
   const countProceso = orders.filter(o => o.status === 'En proceso').length;
   const countEntregados = orders.filter(o => o.status === 'Entregado').length;
 
-  // 3. FUNCIÓN DE WHATSAPP
+  // Aaron: esto arma un deep-link a WhatsApp para confirmar estado con el cliente (sin backend de notificaciones todavía).
   const handleWhatsAppClick = (order: Order) => {
     const cleanPhone = order.phone.replace(/[^0-9]/g, '');
     const mensaje = `¡Hola ${order.customerName}! Te escribimos de Un Toque Ahumado 🔥. Te aviso que tu pedido ${order.id} (${order.items}) ya está ${order.status.toLowerCase()}.`;
@@ -31,7 +30,7 @@ export function OrdersPanel() {
   };
 
   return (
-    <div className="bg-white rounded-xl p-4 md:p-6 border border-gray-200 shadow-sm flex flex-col h-[500px]">
+    <div className="bg-white rounded-xl p-4 md:p-6 border border-gray-200 shadow-sm flex flex-col h-[32rem]">
       
       {/* HEADER DEL PANEL */}
       <div className="flex flex-col xl:flex-row xl:items-center justify-between mb-4 gap-3">
@@ -68,7 +67,7 @@ export function OrdersPanel() {
               {/* INFO DEL CLIENTE */}
               <div className="flex flex-col">
                 <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <span className="text-[#FF5500] font-bold text-sm md:text-base">{order.id}</span>
+                  <span className="text-primary font-bold text-sm md:text-base">{order.id}</span>
                   <span className="text-gray-900 font-medium text-sm md:text-base">{order.customerName}</span>
                 </div>
                 <div className="flex items-center gap-2">

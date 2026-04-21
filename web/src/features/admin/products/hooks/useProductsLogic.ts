@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useAdminStore } from '@/stores/adminStore';
+import { useAdminStore, type Product } from '@/stores/adminStore';
 
 export function useProductsLogic() {
-  // 1. ZUSTAND
+  // Aaron: este hook es el punto único de verdad para el CRUD de productos en el panel. Cuando haya backend, la idea es reemplazar las acciones del store por llamadas al API acá.
   const products = useAdminStore((state) => state.products);
   const addProduct = useAdminStore((state) => state.addProduct);
   const deleteProduct = useAdminStore((state) => state.deleteProduct);
@@ -49,7 +49,7 @@ export function useProductsLogic() {
     setNewProduct({ name: '', description: '', category: 'Hamburguesas Artesanales', price: '', image: '' });
   };
 
-  const handleEditClick = (product: any) => {
+  const handleEditClick = (product: Product) => {
     setEditingId(product.id);
     setNewProduct({
       name: product.name,
