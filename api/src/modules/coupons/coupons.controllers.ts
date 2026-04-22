@@ -53,6 +53,7 @@ export const deleteCoupon = async (req: Request, res: Response) => {
 
         if (!result) return sendError(res, 'Cupon no borrado o encontrado',200)
 
+        return sendSucces(res, result, 200)
     } catch (error) {
         return sendError(res, 'Error al borrar cupon')
     }
