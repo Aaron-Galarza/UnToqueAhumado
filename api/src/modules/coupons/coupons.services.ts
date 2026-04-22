@@ -1,30 +1,19 @@
-import { Coupons } from './coupons.model';
-import db from '../../data/data.json';
+import { iCoupon, CouponModel } from './coupons.model'
 
-const coupons: Coupons[] = db.coupons as Coupons[];
-
-export const viewAll = (): Coupons[] => {
-    return coupons
+export const viewAll = async (): Promise<iCoupon[]> => {
+  return await CouponModel.find()
 }
 
-export const create = (Data: Omit<Coupons, 'id'>): Coupons => {
-  const newCupon: Coupons = {
-    ...Data,
-    id: `ORD-${Math.floor(Math.random() * 10000)}`
-  }
-    
-  coupons.push(newCupon)
-  return newCupon
+export const create = async (data: Partial<iCoupon>): Promise<iCoupon> => {
+  const newCoupon = new CouponModel(data)
+  return await newCoupon.save()
 }
 
-export const search = (Code: string): Coupons | undefined => {
-  const coupon = coupons.find(c => c.code === Code)
-  
-  return coupon
+// Busca por código (case-insensitive: convierte a mayúsculas antes de buscar)
+export const search = async (code: string): Promise<iCoupon | null> => {
+  return await CouponModel.findOne({ code: code.toUpperCase() })
 }
 
-export const deleteById = (id: string) => {
-  const index = coupons.findIndex(c => c.id === id)
-  coupons.splice(index, 1)
-  return true
+export const deleteById = async (id: string): Promise<iCoupon | null> => {
+  return await CouponModel.findByIdAndDelete(id)
 }
