@@ -1,3 +1,5 @@
+// api\src\modules\coupons\coupons.routes.ts
+
 import { Router } from 'express';
 import { getAllCoupons, createNewCoupon, validateCoupon, deleteCoupon } from './coupons.controllers';
 

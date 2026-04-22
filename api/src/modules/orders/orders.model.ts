@@ -1,3 +1,5 @@
+// api\src\modules\orders\orders.model.ts
+
 export interface CartItem {
   productId: string;
   title: string;
@@ -16,6 +18,7 @@ export interface Order {
     address?: string; // Opcional si es retiro
   };
   items: CartItem[];
+  couponCode?: string;
   deliveryType: 'pickup' | 'delivery';
   total: number;
   status: OrderStatus;

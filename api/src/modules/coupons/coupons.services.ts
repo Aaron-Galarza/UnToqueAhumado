@@ -1,3 +1,5 @@
+// api\src\modules\coupons\coupons.services.ts
+
 import { sendError } from '../../utils/response';
 import { Product } from '../productos/products.model';
 import { Coupons } from './coupons.model'

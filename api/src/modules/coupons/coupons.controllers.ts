@@ -1,3 +1,5 @@
+// api\src\modules\coupons\coupons.controllers.ts
+
 import { sendError, sendSucces } from '../../utils/response'
 import { Request, Response } from 'express'
 import * as CouponsService from './coupons.services'
@@ -30,7 +32,7 @@ export const createNewCoupon = async (req: Request, res: Response) => {
 export const validateCoupon = async (req: Request, res: Response) => {
     try {
         const { code } = req.params
-        if (!code) return sendError(res, 'Se necesita un id para validar el cupon')
+        if (!code) return sendError(res, 'Se necesita un code para validar el cupon')
         
         const result = CouponsService.search(code as string)
 

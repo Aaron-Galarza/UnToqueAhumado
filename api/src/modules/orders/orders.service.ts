@@ -1,4 +1,7 @@
+// api\src\modules\orders\orders.service.ts
+
 import { Order, OrderStatus } from './orders.model';
+import * as CouponService from '../coupons/coupons.services'
 
 const orders: Order[] = [
   {
@@ -23,12 +26,37 @@ const orders: Order[] = [
 
 ];
 
-export const createOrder = (orderData: Omit<Order, 'id' | 'status' | 'createdAt'>): Order => {
+export const createOrder = (orderData: any): Order => {
+  
+  let subTotal = 0
+
+  orderData.items.forEach((item: any) => {
+    subTotal += item.price * item.quantity
+  });
+  
+  // cupones
+  let Total = subTotal
+  if (orderData.couponCode) {
+    const coupon = CouponService.search(orderData.couponCode)
+    if (!coupon) {
+
+      throw new Error ('El cupon ingresado no es valido')
+    } else {
+      const discount = (subTotal * coupon.Percent) / 100
+      Total = subTotal - discount
+    }
+  }
+
+
   const newOrder: Order = {
-    ...orderData,
-    id: `ORD-${Math.floor(Math.random() * 10000)}`, // ID temporal
+    id: `ORD-${Math.floor(Math.random() * 10000)}`,
+    customer: orderData.customer,
+    items: orderData.items,
+    deliveryType: orderData.deliveryType,
     status: 'pending',
-    createdAt: new Date()
+    createdAt: new Date(),
+    couponCode: orderData.couponCode || null,
+    total: Math.max(0, Total)
   };
   
   orders.push(newOrder);

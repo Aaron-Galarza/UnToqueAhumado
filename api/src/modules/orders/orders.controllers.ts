@@ -1,12 +1,16 @@
+// api\src\modules\orders\orders.controllers.ts
+
 import { Request, Response } from 'express';
 import * as OrderService from './orders.service';
+import * as CouponService from '../coupons/coupons.services'
+import { validateCoupon } from '../coupons/coupons.controllers';
 import { sendError, sendSucces } from '../../utils/response';
 import { validOrderStatus, OrderStatus} from '../orders/orders.model'
 
 // Controlador para crear pedido
 export const createOrder = (req: Request, res: Response) => {
   try {
-    const { customer, items, deliveryType, arbol } = req.body;
+    const { customer, items, deliveryType, couponCode } = req.body;
 
     // Validaciones clasicas:
 
