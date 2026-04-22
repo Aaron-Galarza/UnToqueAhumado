@@ -51,12 +51,15 @@ export const updateProduct = async (req: Request, res: Response) => {
         const { id } = req.params
 
         if (!id) return sendError(res, 'Se necesita un id para actualizar un producto')
-    
+
         const update = ProductService.modify(id as string, req.body)
+
+        // El service devuelve null si no existe el id
+        if (!update) return sendError(res, 'Producto no encontrado', 404)
 
         return sendSucces(res, update, 200)
     } catch (error) {
-        sendError(res, 'Error al actualizar el producto')
+        return sendError(res, 'Error al actualizar el producto', 500)
     }
 }
 
@@ -64,9 +67,12 @@ export const activeStatusProduct = async (req: Request, res: Response) => {
     try {
         const { id } = req.params
         const product = ProductService.toggleActive(id as string)
+
+        if (!product) return sendError(res, 'Producto no encontrado', 404)
+
         return sendSucces(res, product, 200)
     } catch (error) {
-        return sendError(res, 'Error al activar / desactivar producto')
+        return sendError(res, 'Error al activar / desactivar producto', 500)
     }
 }
 
@@ -75,8 +81,11 @@ export const deleteProduct = async (req: Request, res: Response) => {
         const { id } = req.params
 
         const result = ProductService.deleteById(id as string)
+
+        if (!result) return sendError(res, 'Producto no encontrado', 404)
+
         return sendSucces(res, result)
     } catch (error) {
-        return sendError(res, 'Error al borrar producto')
+        return sendError(res, 'Error al borrar producto', 500)
     }
 }
