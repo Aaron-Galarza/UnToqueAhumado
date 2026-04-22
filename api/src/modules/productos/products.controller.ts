@@ -6,7 +6,7 @@ import { sendError, sendSucces } from '../../utils/response'
 export const getProducts = async (req: Request, res: Response) => { 
 
     try {
-        const products = ProductService.viewAll()
+        const products = await ProductService.viewAll()
         return sendSucces(res, products) // <<---Si funciona tira los todos los productos
     } catch (error) {
         return sendError(res, 'Error al obtener los productos', 500)
@@ -16,7 +16,7 @@ export const getProducts = async (req: Request, res: Response) => {
 //controlador para obtener todo los productos ACTIVOS (publico)
 export const getActiveProducts = async (req: Request, res: Response) => {
     try {
-        const productos = ProductService.viewActive()
+        const productos = await ProductService.viewActive()
         return sendSucces(res, productos)
     } catch (error) {
         return sendError(res, 'Error al obtener los productos', 500)
@@ -38,7 +38,7 @@ export const createNewProduct = async (req: Request, res: Response) => {
 
         if (!description) return sendError(res, 'Descripcion del Producto es obligatoria')
 
-        const newProduct = ProductService.create(req.body)
+        const newProduct = await ProductService.create(req.body)
         return sendSucces(res, newProduct, 201)
     } catch (error) {
         return sendError(res, 'Error al cargar el producto', 500)
@@ -52,7 +52,7 @@ export const updateProduct = async (req: Request, res: Response) => {
 
         if (!id) return sendError(res, 'Se necesita un id para actualizar un producto')
 
-        const update = ProductService.modify(id as string, req.body)
+        const update = await ProductService.modify(id as string, req.body)
 
         // El service devuelve null si no existe el id
         if (!update) return sendError(res, 'Producto no encontrado', 404)
@@ -66,7 +66,7 @@ export const updateProduct = async (req: Request, res: Response) => {
 export const activeStatusProduct = async (req: Request, res: Response) => {
     try {
         const { id } = req.params
-        const product = ProductService.toggleActive(id as string)
+        const product = await ProductService.toggleActive(id as string)
 
         if (!product) return sendError(res, 'Producto no encontrado', 404)
 
@@ -80,7 +80,7 @@ export const deleteProduct = async (req: Request, res: Response) => {
     try {
         const { id } = req.params
 
-        const result = ProductService.deleteById(id as string)
+        const result = await ProductService.deleteById(id as string)
 
         if (!result) return sendError(res, 'Producto no encontrado', 404)
 

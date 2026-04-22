@@ -1,72 +1,49 @@
-import { Product } from './products.model';
-import db from '../../data/data.json';
-
-const products: Product[] = db.products as Product[];
+import { iProducto, ProductModel } from './products.model'; // Importación limpia
+// const products: Product[] = db.products as Product[];
 
 // Servicio para obtener todos los productos (admin)
-export const viewAll = (): Product[] => {
-  return products;
+export const viewAll = async (): Promise<iProducto[]> => {
+  return await ProductModel.find();
 };
 
 // Servicio para obtener todos los productos ACTIVOS (publico)
-export const viewActive = (): Product[] => {
- return products.filter(p => p.active)
+export const viewActive = async (): Promise<iProducto[]> => {
+ return await ProductModel.find({ active: true })
 }
 
 // Servicio para obtener un producto por ID
-export const viewById = (id: string): Product | undefined => {
-  return products.find(p => p.id === id)
+export const viewById = async (id: string): Promise<iProducto | null> => {
+  return await ProductModel.findById(id)
 }
 
 // Servicio para crear un nuevo producto (ADMIN)
-export const create = (data: Omit<Product, 'id' | 'active'>): Product => {
-
-  const newProduct: Product = {
-    ...data,
-    id: String(products.length + 1),
-    active: true
-  };
-
-  products.push(newProduct)
-  return newProduct
+export const create = async (data: Partial<iProducto>): Promise<iProducto> => {
+  const newProduct = new ProductModel(data)
+  return await newProduct.save()
 }
 
 // Servicio para Actualizar un producto (ADMIN)
-export const modify = (id: string, data: Partial<Product>): Product | null => {
-  const index = products.findIndex(p => p.id === id)
-  if (index === -1) return null
-
-  const product = products[index]
-
-  product.title = data.title || product.title
-  product.description = data.description || product.description
-  product.image = data.image || product.image
-  product.category = data.category || product.category
-
-  if (typeof data.price === 'number' && data.price >= 0 ) {
-    product.price = data.price || product.price
-  }
-  
-  products[index] = product
-  return products[index]
-
+export const modify = async (id: string, data: Partial<iProducto>): Promise<iProducto | null> => {
+  return await ProductModel.findByIdAndUpdate(id,
+    { $set: data },
+    { new: true,
+      runValidators: true
+     }
+  )
 }
 
 // Servicio para Activar/Desactivar un Producto
-export const toggleActive = (id: string) => {
-  const index = products.findIndex(p => p.id === id)
-  if (index === -1) return null
+export const toggleActive = async (id: string): Promise<iProducto | null> => {
+  const product = await ProductModel.findById(id)
 
-  products[index].active = !products[index].active
-  return products[index]
+  if (!product) return null
 
+  product.active = !product.active 
+  return await product.save()
 }
 
 // Servicio para eliminar un producto permanentemente
-export const deleteById = (id: string) => {
-  const index = products.findIndex(p => p.id === id)
-  if (index === -1) return null
-
-  products.splice(index, 1)
-  return true
+export const deleteById = async (id: string): Promise<iProducto | null> => {
+  const results = ProductModel.findByIdAndDelete(id)
+  return await results
 }
