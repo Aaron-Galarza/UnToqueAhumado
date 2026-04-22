@@ -1,30 +1,13 @@
-// api\src\modules\orders\orders.service.ts
-
 import { Order, OrderStatus } from './orders.model';
-import * as CouponService from '../coupons/coupons.services'
+import * as CouponService from '../coupons/coupons.services';
+import db from '../../data/data.json';
 
-const orders: Order[] = [
-  {
-    id: "ORD-8712",
-    customer: {
-      name: "Juan Perez",
-      phone: "12345678"
-    },
-    items: [
-      {
-        productId: "1",
-        title: "Doble Smash",
-        price: 10900,
-        quantity: 1
-      }
-    ],
-    deliveryType: "delivery",
-    status: "pending",
-    createdAt: new Date("2026-04-19T15:07:19.188Z"),
-    total: 10900
-  }
-
-];
+const orders: Order[] = db.orders.map(o => ({
+  ...o,
+  deliveryType: o.deliveryType as Order['deliveryType'],
+  status: o.status as OrderStatus,
+  createdAt: new Date(o.createdAt)
+}));
 
 export const createOrder = (orderData: any): Order => {
   
@@ -55,7 +38,7 @@ export const createOrder = (orderData: any): Order => {
     deliveryType: orderData.deliveryType,
     status: 'pending',
     createdAt: new Date(),
-    couponCode: orderData.couponCode || null,
+    couponCode: orderData.couponCode,
     total: Math.max(0, Total)
   };
   

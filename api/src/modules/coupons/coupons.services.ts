@@ -1,22 +1,7 @@
-// api\src\modules\coupons\coupons.services.ts
+import { Coupons } from './coupons.model';
+import db from '../../data/data.json';
 
-import { sendError } from '../../utils/response';
-import { Product } from '../productos/products.model';
-import { Coupons } from './coupons.model'
-
-// Datos mock
-const coupons: Coupons[] = [
-  {
-    id: '1',
-    code: 'VERANO2026',
-    Percent: 10 
-  },
-    {
-    id: '2',
-    code: 'SMASHTIKTOK',
-    Percent: 30
-  }
-];
+const coupons: Coupons[] = db.coupons as Coupons[];
 
 export const viewAll = (): Coupons[] => {
     return coupons
