@@ -1,11 +1,11 @@
 import { Request, Response } from 'express'
 import * as OrderService from './orders.service'
 import { sendError, sendSucces } from '../../utils/response'
-import { validOrderStatus, OrderStatus } from './orders.model'
+import { validOrderStatus, OrderStatus, validPaymentMethods, PaymentMethod } from './orders.model'
 
 export const createOrder = async (req: Request, res: Response) => {
   try {
-    const { customer, items, deliveryType } = req.body
+    const { customer, items, deliveryType, paymentMethod } = req.body
 
     if (!customer?.name || !customer?.phone) {
       return sendError(res, 'Nombre y teléfono del cliente son requeridos')
@@ -21,8 +21,24 @@ export const createOrder = async (req: Request, res: Response) => {
       return sendError(res, 'Cada item debe tener productId y quantity mayor a 0')
     }
 
+    // Validar adicionales si vienen: addonId requerido, quantity entre 1 y 10
+    for (const item of items) {
+      if (item.addons && item.addons.length > 0) {
+        const addonInvalido = item.addons.some(
+          (a: any) => !a.addonId || !a.quantity || a.quantity <= 0 || a.quantity > 10
+        )
+        if (addonInvalido) {
+          return sendError(res, 'Cada adicional debe tener addonId y quantity entre 1 y 10')
+        }
+      }
+    }
+
     if (!deliveryType) {
       return sendError(res, 'Debes seleccionar el tipo de entrega (pickup o delivery)')
+    }
+
+    if (!validPaymentMethods.includes(paymentMethod as PaymentMethod)) {
+      return sendError(res, 'Método de pago inválido. Opciones: Efectivo, Transferencia')
     }
 
     const order = await OrderService.createOrder(req.body)

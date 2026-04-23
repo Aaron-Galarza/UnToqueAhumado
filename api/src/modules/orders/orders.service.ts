@@ -1,26 +1,51 @@
-import { iOrder, iCartItem, OrderModel, OrderStatus } from './orders.model'
+import { iOrder, iCartItem, iCartAddon, OrderModel, OrderStatus } from './orders.model'
 import * as CouponService from '../coupons/coupons.services'
 import * as ProductService from '../productos/products.service'
+import * as AdicionalService from '../adicionales/adicionales.service'
 
 export const createOrder = async (orderData: any): Promise<iOrder> => {
 
-  // Snapshot de precios: busca cada producto en la BD para que
-  // el cliente no pueda mandar un precio manipulado
   const items: iCartItem[] = await Promise.all(
     orderData.items.map(async (item: any) => {
+
+      // Snapshot del producto: precio real del catálogo
       const product = await ProductService.viewById(item.productId)
       if (!product) throw new Error(`Producto ${item.productId} no encontrado`)
+
+      // Snapshot de adicionales si vienen en el item
+      let addons: iCartAddon[] = []
+      if (item.addons && item.addons.length > 0) {
+        addons = await Promise.all(
+          item.addons.map(async (a: any) => {
+            const adicional = await AdicionalService.viewById(a.addonId)
+            if (!adicional) throw new Error(`Adicional ${a.addonId} no encontrado`)
+
+            return {
+              addonId:  a.addonId,
+              title:    adicional.title,
+              price:    adicional.price,  // precio real del catálogo
+              quantity: a.quantity
+            }
+          })
+        )
+      }
 
       return {
         productId: item.productId,
         title:     product.title,
-        price:     product.price,  // precio real del catálogo
-        quantity:  item.quantity
+        price:     product.price,
+        quantity:  item.quantity,
+        addons
       }
     })
   )
 
-  const subTotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0)
+  // Total: suma productos + adicionales de cada item
+  const subTotal = items.reduce((acc, item) => {
+    const itemTotal   = item.price * item.quantity
+    const addonsTotal = (item.addons || []).reduce((a, addon) => a + addon.price * addon.quantity, 0)
+    return acc + itemTotal + addonsTotal
+  }, 0)
 
   let total = subTotal
   if (orderData.couponCode) {
@@ -32,11 +57,12 @@ export const createOrder = async (orderData: any): Promise<iOrder> => {
   }
 
   const newOrder = new OrderModel({
-    customer:     orderData.customer,
+    customer:      orderData.customer,
     items,
-    deliveryType: orderData.deliveryType,
-    couponCode:   orderData.couponCode,
-    total:        Math.max(0, total)
+    deliveryType:  orderData.deliveryType,
+    paymentMethod: orderData.paymentMethod,
+    couponCode:    orderData.couponCode,
+    total:         Math.max(0, total)
   })
 
   const saved = await newOrder.save()

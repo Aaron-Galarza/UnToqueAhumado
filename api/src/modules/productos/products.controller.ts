@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import * as ProductService from './products.service'
+import * as CategoriaService from '../categorias/categorias.service'
 import { sendError, sendSucces } from '../../utils/response'
 
 // Controlador para obtener todos los productos (adminin)
@@ -27,23 +28,22 @@ export const getActiveProducts = async (req: Request, res: Response) => {
 //controlador para crear producto nuevo
 export const createNewProduct = async (req: Request, res: Response) => {
     try {
-        const {  title, price, description, image, category } = req.body
+        const { title, price, description, image, category } = req.body
 
-        // Validacion clasicas:
-        if (!title) return sendError(res, 'Nombre del Producto es obligatorio')
-        
-        if (!category) return sendError(res, 'Categoria del Producto es obligatorio')
-        
-        if (!price) return sendError(res, 'Precio del Producto es obligatorio')
-
+        if (!title)       return sendError(res, 'Nombre del Producto es obligatorio')
+        if (!category)    return sendError(res, 'Categoria del Producto es obligatorio')
+        if (!price)       return sendError(res, 'Precio del Producto es obligatorio')
         if (!description) return sendError(res, 'Descripcion del Producto es obligatoria')
+
+        // Validar que la categoría exista y esté activa
+        const categoriaValida = await CategoriaService.findByName(category)
+        if (!categoriaValida) return sendError(res, `La categoría "${category}" no existe o está inactiva`)
 
         const newProduct = await ProductService.create(req.body)
         return sendSucces(res, newProduct, 201)
     } catch (error) {
         return sendError(res, 'Error al cargar el producto', 500)
     }
-
 }
 
 export const updateProduct = async (req: Request, res: Response) => {
@@ -52,9 +52,14 @@ export const updateProduct = async (req: Request, res: Response) => {
 
         if (!id) return sendError(res, 'Se necesita un id para actualizar un producto')
 
+        // Si viene category en el body, validar que exista y esté activa
+        if (req.body.category) {
+            const categoriaValida = await CategoriaService.findByName(req.body.category)
+            if (!categoriaValida) return sendError(res, `La categoría "${req.body.category}" no existe o está inactiva`)
+        }
+
         const update = await ProductService.modify(id as string, req.body)
 
-        // El service devuelve null si no existe el id
         if (!update) return sendError(res, 'Producto no encontrado', 404)
 
         return sendSucces(res, update, 200)
