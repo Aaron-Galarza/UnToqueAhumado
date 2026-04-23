@@ -3,12 +3,12 @@
 import { useState } from 'react';
 import { Search } from 'lucide-react';
 
-// 1. Importamos tus componentes y datos originales
+// 1. Importamos el hook que se conecta al backend
+import { useCatalog } from '@/features/menu/hooks/useCatalog';
+
+// 2. Importamos tus componentes visuales
 import { FloatingCart } from '@/features/cart/components/FloatingCart';
 import { ProductList } from '@/features/menu/components/ProductList';
-import { mockProducts } from '@/features/menu/data/mockProducts';
-
-// 2. Importamos los componentes nuevos
 import { CategorySelector } from '@/features/menu/components/CategorySelector';
 import { MenuSearch } from '@/features/menu/components/MenuSearch';
 
@@ -17,15 +17,16 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState("Hamburguesas Artesanales");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Aaron: hoy el menú sale de `mockProducts`. Cuando conectes el backend, lo ideal es mantener el mismo shape y este filtro puede vivir acá o del lado del API.
+
+  const { products, isLoading, error } = useCatalog();
 
   // --- FUNCIÓN MÁGICA PARA LIMPIAR ACENTOS ---
   const removeAccents = (str: string) => {
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   };
 
-  // --- LÓGICA DE FILTRO MEJORADA ---
-  const filteredProducts = mockProducts.filter(p => {
+  // Ahora filtramos el array 'products' que nos devuelve la API, no el mock
+  const filteredProducts = products.filter(p => {
     const productName = p.title || "";
     
     // Limpiamos el nombre del producto (minúsculas y sin acentos)
@@ -39,7 +40,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background flex flex-col relative pb-10">
       
-      {/* HERO SECTION (Tu foto de fondo intacta) */}
+      {/* HERO SECTION  */}
       <section
         className="w-full relative rounded-b-[2.5rem] shadow-md z-10 flex flex-col items-center justify-center pt-12 pb-16 bg-cover bg-center bg-[url('https://lavozdelosbarrios.com/wp-content/uploads/2025/04/Milei-925x535.jpg')]"
       >
@@ -81,27 +82,34 @@ export default function Home() {
         <div className="mt-8 mb-4 px-1">
           
           {/* BANNER DE CATEGORÍA ESTILO FIGMA */}
-          <div className="bg-secondary px-4 py-3 border border-border rounded-xl flex items-center justify-between mb-4 shadow-sm">
-            <div className="flex items-center gap-2">
-              <h2 className="font-bold text-foreground text-sm uppercase tracking-wider">
-                {activeCategory}
-              </h2>
-              {activeCategory === "Hamburguesas Artesanales" && (
-                <span className="text-primary text-[10px] font-bold uppercase tracking-wide">
-                  (Salen con papas)
-                </span>
-              )}
+          {/* Ocultamos el banner si está cargando o si hay error, queda más limpio */}
+          {!isLoading && !error && (
+            <div className="bg-secondary px-4 py-3 border border-border rounded-xl flex items-center justify-between mb-4 shadow-sm">
+              <div className="flex items-center gap-2">
+                <h2 className="font-bold text-foreground text-sm uppercase tracking-wider">
+                  {activeCategory}
+                </h2>
+                {activeCategory === "Hamburguesas Artesanales" && (
+                  <span className="text-primary text-[10px] font-bold uppercase tracking-wide">
+                    (Salen con papas)
+                  </span>
+                )}
+              </div>
+              <span className="bg-white text-primary text-[11px] font-bold px-2.5 py-0.5 rounded-md border border-[#FFDAB9] shadow-sm">
+                {filteredProducts.length}
+              </span>
             </div>
-            <span className="bg-white text-primary text-[11px] font-bold px-2.5 py-0.5 rounded-md border border-[#FFDAB9] shadow-sm">
-              {filteredProducts.length}
-            </span>
-          </div>
+          )}
           
-          {/* Le pasamos SOLO los productos filtrados al ProductList */}
-          <ProductList products={filteredProducts} />
+          {/* Le pasamos los productos filtrados y los estados al ProductList */}
+          <ProductList 
+            products={filteredProducts} 
+            isLoading={isLoading}
+            error={error}
+          />
 
-          {/* Mensaje de error si la búsqueda no encuentra nada */}
-          {filteredProducts.length === 0 && (
+          {/* Mensaje de error si la búsqueda no encuentra nada, SOLO si ya terminó de cargar */}
+          {!isLoading && !error && filteredProducts.length === 0 && products.length > 0 && (
             <div className="bg-card rounded-2xl border border-border text-center py-16 px-4 shadow-sm mt-4">
               <Search className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
               <p className="text-sm font-semibold text-muted-foreground">No encontramos productos con esa búsqueda.</p>

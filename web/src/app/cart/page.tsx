@@ -2,10 +2,8 @@
 
 import { ArrowLeft, Trash2 } from 'lucide-react'; 
 
-// Importamos nuestro cerebro
 import { useCartLogic } from '@/features/cart/hooks/useCartLogic';
 
-// Componentes Visuales
 import { CartItemCard } from '@/features/cart/components/CartItemCard';
 import { DeliverySelector } from '@/features/cart/components/DeliverySelector';
 import { CustomerForm } from '@/features/cart/components/CustomerForm';
@@ -15,12 +13,12 @@ import { ConfirmButton } from '@/features/cart/components/ConfirmButton';
 import { PaymentSelector } from '@/features/cart/components/PaymentSelector';
 
 export default function CartPage() {
+  // Extraemos las variables actualizadas del hook, eliminando las obsoletas (ej. promoCode)
   const {
     cartItems, paymentMethod, setPaymentMethod, deliveryType, setDeliveryType,
-    promoCode, setPromoCode, discountApplied, customerData, formErrors,
-    subtotal, discount, deliveryFee, total, handleRemoveItem, updateMainQuantity, 
-    setAdicional, handleApplyPromo, handleCustomerDataChange, handleClearCart, 
-    handleConfirmOrder, router
+    customerData, formErrors, subtotal, discount, deliveryFee, total,
+    handleRemoveItem, updateMainQuantity, setAdicional, handleCustomerDataChange, 
+    handleClearCart, handleConfirmOrder, isSubmitting, orderData, router
   } = useCartLogic();
 
   return (
@@ -49,8 +47,11 @@ export default function CartPage() {
 
           {cartItems.map(item => (
             <CartItemCard 
-              key={item.id} item={item} 
-              onUpdateQuantity={updateMainQuantity} onRemoveItem={handleRemoveItem} onUpdateAdicional={setAdicional}
+              key={item.productId} 
+              item={item} 
+              onUpdateQuantity={updateMainQuantity} 
+              onRemoveItem={handleRemoveItem} 
+              onUpdateAdicional={setAdicional}
             />
           ))}
           
@@ -74,11 +75,23 @@ export default function CartPage() {
             
             <PaymentSelector paymentMethod={paymentMethod} onChange={setPaymentMethod} />
             
-            <CouponInput promoCode={promoCode} setPromoCode={setPromoCode} onApply={handleApplyPromo} discountApplied={discountApplied} />
+            <CouponInput />
 
-            <CartSummary subtotal={subtotal} discount={discount} deliveryFee={deliveryFee} total={total} discountApplied={discountApplied} deliveryType={deliveryType} />
+            <CartSummary 
+              subtotal={subtotal} 
+              discount={discount} 
+              deliveryFee={deliveryFee} 
+              total={total} 
+              discountApplied={!!orderData.couponCode} 
+              deliveryType={deliveryType} 
+            />
 
-            <ConfirmButton mode="inline" isDisabled={cartItems.length === 0} onClick={handleConfirmOrder} />
+            <ConfirmButton 
+              mode="inline" 
+              isDisabled={cartItems.length === 0} 
+              isLoading={isSubmitting}
+              onClick={handleConfirmOrder} 
+            />
           </>
         )}
       </main>

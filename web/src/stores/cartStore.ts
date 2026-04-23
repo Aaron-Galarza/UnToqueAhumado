@@ -1,37 +1,37 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { CartItem } from '@/features/cart/types/cart';
+import { CartItem } from '@/types'; 
 
-// Aaron: este store persiste el carrito en el cliente. Si más adelante el backend maneja carrito por usuario, acá lo usamos como cache y sincronizamos.
 
-// Definimos el formato de los datos del pedido
 export interface OrderData {
   name: string;
   phone: string;
   address: string;
-  deliveryType: 'takeaway' | 'delivery';
-  discountApplied: boolean;
-  paymentMethod: 'Efectivo' | 'Transferencia';
+  deliveryType: 'pickup' | 'delivery'; 
+  couponCode?: string; 
+  paymentMethod: 'Efectivo' | 'Transferencia'; }
+
+export interface CartItemWithExtras extends CartItem {
+  adicionales?: Record<string, number>;
 }
 
 interface CartState {
-  items: CartItem[];
-  orderData: OrderData; // Siempre arranca con valores por defecto para evitar null-checks en la UI.
-  addItem: (item: CartItem) => void;
-  removeItem: (id: number) => void;
-  updateQuantity: (id: number, delta: number) => void;
-  updateAdicional: (itemId: number, adId: string, delta: number) => void;
+  items: CartItemWithExtras[];
+  orderData: OrderData; 
+  addItem: (item: CartItemWithExtras) => void;
+  // 4. Pasamos los IDs a productId (string)
+  removeItem: (productId: string) => void;
+  updateQuantity: (productId: string, delta: number) => void;
+  updateAdicional: (productId: string, adId: string, delta: number) => void;
   setOrderData: (data: OrderData) => void;
   clearCart: () => void;
 }
 
-// Valores por defecto para que arranque limpio
 const initialOrderData: OrderData = {
   name: '',
   phone: '',
   address: '',
-  deliveryType: 'takeaway',
-  discountApplied: false,
+  deliveryType: 'pickup', 
   paymentMethod: 'Efectivo',
 };
 
@@ -43,7 +43,8 @@ export const useCartStore = create<CartState>()(
 
       addItem: (newItem) => set((state) => {
         const existingItemIndex = state.items.findIndex(
-          (item) => item.id === newItem.id && JSON.stringify(item.adicionales) === JSON.stringify(newItem.adicionales)
+          // Comparamos usando productId
+          (item) => item.productId === newItem.productId && JSON.stringify(item.adicionales) === JSON.stringify(newItem.adicionales)
         );
         if (existingItemIndex >= 0) {
           const newItems = [...state.items];
@@ -53,24 +54,27 @@ export const useCartStore = create<CartState>()(
         return { items: [...state.items, newItem] };
       }),
 
-      removeItem: (id) => set((state) => ({
-        items: state.items.filter(item => item.id !== id)
+      // Filtramos usando productId
+      removeItem: (productId) => set((state) => ({
+        items: state.items.filter(item => item.productId !== productId)
       })),
 
-      updateQuantity: (id, delta) => set((state) => ({
+      // Buscamos y actualizamos usando productId
+      updateQuantity: (productId, delta) => set((state) => ({
         items: state.items.map(item => {
-          if (item.id !== id) return item;
+          if (item.productId !== productId) return item;
           const nextQty = Math.min(10, Math.max(1, item.quantity + delta));
           return { ...item, quantity: nextQty };
         })
       })),
 
-      updateAdicional: (itemId, adId, delta) => set((state) => ({
+      // Buscamos y actualizamos usando productId
+      updateAdicional: (productId, adId, delta) => set((state) => ({
         items: state.items.map(item => {
-          if (item.id !== itemId) return item;
-          const currentQty = item.adicionales[adId] || 0;
+          if (item.productId !== productId) return item;
+          const currentQty = item.adicionales?.[adId] || 0;
           const nextQty = Math.min(10, Math.max(0, currentQty + delta));
-          return { ...item, adicionales: { ...item.adicionales, [adId]: nextQty } };
+          return { ...item, adicionales: { ...(item.adicionales || {}), [adId]: nextQty } };
         })
       })),
 

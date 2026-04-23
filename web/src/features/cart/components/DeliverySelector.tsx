@@ -3,9 +3,10 @@
 import { Store, Bike } from "lucide-react";
 
 interface DeliverySelectorProps {
-  deliveryType: 'takeaway' | 'delivery'; 
-  onSelect: (type: 'takeaway' | 'delivery') => void; 
+  deliveryType: 'pickup' | 'delivery';
+  onSelect: (type: 'pickup' | 'delivery') => void;
 }
+// Nota: Si adentro del componente tenías un botón que decía onSelect('takeaway'), cambialo a onSelect('pickup').
 
 export function DeliverySelector({ deliveryType, onSelect }: DeliverySelectorProps) {
   return (
@@ -14,11 +15,11 @@ export function DeliverySelector({ deliveryType, onSelect }: DeliverySelectorPro
       {/* Botón Retiro por Local */}
       <button 
         className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 font-bold text-sm transition-all cursor-pointer ${
-          deliveryType === 'takeaway' 
+          deliveryType === 'pickup' 
             ? 'border-primary bg-primary/10 text-primary' 
             : 'border-border bg-card text-muted-foreground hover:border-primary/50'
         }`} 
-        onClick={() => onSelect('takeaway')}
+        onClick={() => onSelect('pickup')}
       >
         <Store className="w-6 h-6" /> 
         Retiro por local

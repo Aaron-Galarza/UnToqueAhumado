@@ -1,11 +1,13 @@
+"use client";
+
 interface CartSummaryProps {
   subtotal: number;
   discount: number;
   deliveryFee: number | string;
   total: number;
   discountApplied: boolean;
-  deliveryType: 'takeaway' | 'delivery';
-  discountPercentage?: number;
+  deliveryType: 'pickup' | 'delivery';
+  discountPercentage?: number; // Agregado a la interfaz de forma opcional
 }
 
 export function CartSummary({ 
@@ -15,7 +17,7 @@ export function CartSummary({
   total, 
   discountApplied, 
   deliveryType,
-  discountPercentage = 10 
+  discountPercentage 
 }: CartSummaryProps) {
   
   const fmt = (n: number) => '$' + Math.round(n).toLocaleString('es-AR');
@@ -39,10 +41,11 @@ export function CartSummary({
           </span>
         </div>
 
-        {/* Descuento bien claro */}
+        {/* Descuento dinámico */}
         {discountApplied && (
           <div className="flex justify-between items-center text-sm font-extrabold text-green-600 bg-green-500/10 px-2 py-1.5 rounded-lg -mx-2 animate-in fade-in">
-            <span>Cupón aplicado ({discountPercentage}%)</span>
+            {/* Si viene el porcentaje lo mostramos, si no, solo el texto */}
+            <span>Cupón aplicado {discountPercentage ? `(${discountPercentage}%)` : ''}</span>
             <span>−{fmt(discount)}</span>
           </div>
         )}
@@ -55,7 +58,7 @@ export function CartSummary({
           </div>
         )}
 
-        {/* Total Final Limpio */}
+        {/* Total Final */}
         <div className="border-t-2 border-border pt-3 mt-1 flex justify-between items-center">
           <span className="text-lg font-black text-foreground">Total</span>
           <span className="text-2xl font-black text-primary">

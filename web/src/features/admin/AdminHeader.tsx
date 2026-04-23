@@ -6,6 +6,14 @@ import { useRouter } from 'next/navigation';
 export function AdminHeader() {
   const router = useRouter();
 
+  const handleLogout = () => {
+    // 1. Destruimos el token de seguridad del navegador
+    localStorage.removeItem('token');
+    
+    // 2. Redirigimos al usuario fuera del panel
+    router.push('/');
+  };
+
   return (
     <header className="bg-[#FFF9F5] border-b border-[#FFE8D9] px-4 md:px-6 py-4 sticky top-0 z-50 shadow-sm">
       <div className="max-w-[1400px] mx-auto flex items-center justify-between">
@@ -24,17 +32,17 @@ export function AdminHeader() {
             <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center font-bold text-white">AD</div>
             <div className="text-right">
               <p className="text-sm font-bold text-gray-900">Administrador</p>
-              <p className="text-xs text-gray-500">admin@untoque.com</p>
+              <p className="text-xs text-gray-500">admin@ahumado.com</p>
             </div>
           </div>
-          {/* Aaron: cuando haya auth real, este botón debería cerrar sesión (token/cookie) antes de volver al home. */}
-<button
-  onClick={() => router.push('/')}
-  className="flex items-center gap-2 bg-[#FFF0E5] text-primary border border-primary/30 hover:bg-primary hover:text-white px-3 py-2 md:px-4 md:py-2 rounded-lg transition-all cursor-pointer shadow-sm hover:shadow-md"
->
-  <ArrowLeft className="w-4 h-4" />
-  <span className="text-sm font-bold hidden sm:inline">Cerrar Sesión</span>
-</button>
+          
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 bg-[#FFF0E5] text-primary border border-primary/30 hover:bg-primary hover:text-white px-3 py-2 md:px-4 md:py-2 rounded-lg transition-all cursor-pointer shadow-sm hover:shadow-md"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="text-sm font-bold hidden sm:inline">Cerrar Sesión</span>
+          </button>
         </div>
       </div>
     </header>

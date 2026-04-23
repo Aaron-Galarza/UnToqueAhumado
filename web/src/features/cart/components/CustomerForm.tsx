@@ -9,10 +9,10 @@ export interface CustomerData {
 }
 
 interface CustomerFormProps {
-  deliveryType: 'takeaway' | 'delivery';
-  data: CustomerData;
-  onChange: (field: keyof CustomerData, value: string) => void;
-  errors: Partial<CustomerData>;
+  deliveryType: 'pickup' | 'delivery';
+  data: { name: string; phone: string; address: string };
+  onChange: (field: any, value: string) => void;
+  errors: { name: string; phone: string; address: string };
 }
 
 export function CustomerForm({ deliveryType, data, onChange, errors }: CustomerFormProps) {
