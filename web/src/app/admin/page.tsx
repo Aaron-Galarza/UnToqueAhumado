@@ -7,7 +7,7 @@ import { AnalyticsPanel } from '@/features/admin/analytics/components/AnalyticsP
 import { OrdersPanel } from '@/features/admin/orders/components/OrdersPanel';
 import { CouponsPanel } from '@/features/admin/cupones/components/CouponsPanel';
 import { ProductsPanel } from '@/features/admin/products/components/ProductsPanel';
-
+import { CategoriesPanel } from '@/features/admin/products/components/CategoriesPanel';
 export default function AdminDashboard() {
   return (
     // 2. Envolvemos todo el Dashboard adentro del Guardián
@@ -28,6 +28,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* FILA 3: Productos */}
+          <CategoriesPanel />
           <ProductsPanel />
         </main>
 

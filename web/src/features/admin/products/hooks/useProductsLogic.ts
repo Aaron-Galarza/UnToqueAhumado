@@ -1,75 +1,150 @@
-import { useState } from 'react';
-import { useAdminStore, type Product } from '@/stores/adminStore';
+import { useState, useEffect } from 'react';
+import { api } from '@/lib/api';
+
+export interface Product {
+  _id: string;
+  title: string;
+  price: number;
+  description: string;
+  image: string;
+  category: string;
+  active: boolean;
+}
+
+// NUEVA INTERFAZ PARA LAS CATEGORÍAS
+export interface Category {
+  _id: string;
+  name: string;
+}
 
 export function useProductsLogic() {
-  // Aaron: este hook es el punto único de verdad para el CRUD de productos en el panel. Cuando haya backend, la idea es reemplazar las acciones del store por llamadas al API acá.
-  const products = useAdminStore((state) => state.products);
-  const addProduct = useAdminStore((state) => state.addProduct);
-  const deleteProduct = useAdminStore((state) => state.deleteProduct);
-  const updateProduct = useAdminStore((state) => state.updateProduct);
+  const [products, setProducts] = useState<Product[]>([]);
+  // NUEVO ESTADO PARA CATEGORÍAS
+  const [categories, setCategories] = useState<Category[]>([]); 
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // 2. ESTADOS LOCALES
-  const [productCategoryFilter, setProductCategoryFilter] = useState('Todas');
-  const [editingId, setEditingId] = useState<number | null>(null);
-  
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [newProduct, setNewProduct] = useState({
-    name: '', description: '', category: 'Hamburguesas Artesanales', price: '', image: ''
+    title: '',
+    price: '',
+    description: '',
+    image: '',
+    category: '' // Arranca vacío hasta que carguen las de verdad
   });
 
-  // 3. LÓGICA Y HANDLERS
-  const filteredProducts = productCategoryFilter === 'Todas' 
-    ? products 
-    : products.filter(p => p.category === productCategoryFilter);
+  const [productCategoryFilter, setProductCategoryFilter] = useState('Todas');
 
-  const handleSaveProduct = () => {
-    if (!newProduct.name || !newProduct.price || !newProduct.image) {
-      alert("Por favor completá al menos el nombre, precio e imagen.");
+  const fetchProducts = async () => {
+    setIsLoading(true);
+    const response = await api.get<Product[]>('/api/productos/admin');
+    if (response.success && response.data) {
+      setProducts(response.data);
+    } else {
+      setError('Error al cargar los productos');
+    }
+    setIsLoading(false);
+  };
+
+  // NUEVA FUNCIÓN PARA TRAER CATEGORÍAS REALES
+const fetchCategories = async () => {
+    const response = await api.get<Category[]>('/api/categorias');
+    
+    if (response.success && response.data && response.data.length > 0) {
+      // Guardamos la data en una constante segura para que TypeScript no pierda el tipado
+      const fetchedCategories = response.data; 
+      
+      setCategories(fetchedCategories);
+      setNewProduct(prev => ({ ...prev, category: fetchedCategories[0].name }));
+    }
+  };
+  
+  useEffect(() => {
+    fetchProducts();
+    fetchCategories(); // Lo llamamos al cargar
+  }, []);
+
+  const handleSaveProduct = async () => {
+    if (!newProduct.title || !newProduct.price || !newProduct.description || !newProduct.image || !newProduct.category) {
+      alert("Por favor completá todos los campos.");
       return;
     }
 
+    const payload = {
+      ...newProduct,
+      price: Number(newProduct.price)
+    };
+
+    let response;
     if (editingId) {
-      updateProduct(editingId, {
-        name: newProduct.name,
-        description: newProduct.description || 'Sin descripción',
-        category: newProduct.category,
-        price: Number(newProduct.price),
-        image: newProduct.image
-      });
-      setEditingId(null);
+      response = await api.put(`/api/productos/admin/${editingId}`, payload);
     } else {
-      addProduct({
-        name: newProduct.name,
-        description: newProduct.description || 'Sin descripción',
-        category: newProduct.category,
-        price: Number(newProduct.price),
-        image: newProduct.image
-      });
+      response = await api.post('/api/productos/admin', payload);
     }
 
-    setNewProduct({ name: '', description: '', category: 'Hamburguesas Artesanales', price: '', image: '' });
+    if (response.success) {
+      fetchProducts();
+      cancelEdit();
+    } else {
+      alert(`Error al guardar: ${response.error || 'Verificá que la categoría sea válida'}`);
+    }
+  };
+
+  const deleteProduct = async (id: string) => {
+    if (window.confirm('¿Estás seguro de eliminar este producto de forma permanente?')) {
+      const response = await api.delete(`/api/productos/admin/${id}`);
+      if (response.success) {
+        fetchProducts();
+      }
+    }
+  };
+
+  const toggleProductActive = async (id: string) => {
+    const response = await api.put(`/api/productos/admin/toggleActive/${id}`, {});
+    if (response.success) {
+      fetchProducts();
+    }
   };
 
   const handleEditClick = (product: Product) => {
-    setEditingId(product.id);
+    setEditingId(product._id);
     setNewProduct({
-      name: product.name,
-      description: product.description,
-      category: product.category,
-      price: product.price.toString(),
-      image: product.image
+      title: product.title || '',
+      price: String(product.price || ''),
+      description: product.description || '',
+      image: product.image || '',
+      category: product.category || (categories[0]?.name || '')
     });
-    // ¡CHAU SCROLL! Se queda exactamente donde el usuario hizo clic.
   };
 
   const cancelEdit = () => {
     setEditingId(null);
-    setNewProduct({ name: '', description: '', category: 'Hamburguesas Artesanales', price: '', image: '' });
+    setNewProduct({
+      title: '',
+      price: '',
+      description: '',
+      image: '',
+      category: categories[0]?.name || '' // Reseteamos a la primera real
+    });
   };
 
+  const filteredProducts = products.filter(p => 
+    productCategoryFilter === 'Todas' ? true : p.category === productCategoryFilter
+  );
+
   return {
+    products,
+    categories, // EXPORTAMOS LAS CATEGORÍAS
+    isLoading,
+    error,
     newProduct, setNewProduct,
     productCategoryFilter, setProductCategoryFilter,
-    filteredProducts, handleSaveProduct, deleteProduct,
-    handleEditClick, editingId, cancelEdit
+    filteredProducts, 
+    handleSaveProduct, 
+    deleteProduct,
+    toggleProductActive,
+    handleEditClick, 
+    editingId, 
+    cancelEdit
   };
 }

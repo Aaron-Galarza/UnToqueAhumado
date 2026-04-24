@@ -6,7 +6,7 @@ export interface AuthResponse {
 
 // --- PRODUCTOS ---
 export interface Product {
-  id: string;          // Cambió de number a string
+  _id: string;          // Cambió de number a string
   title: string;       // Aaron usa 'title', nosotros usábamos 'name'
   price: number;
   description: string;
@@ -21,7 +21,8 @@ export interface CartItem {
   title: string;
   price: number;
   quantity: number;
-  image?: string;      // Lo guardamos para la vista del carrito, pero no va a la API
+  image?: string;  
+  category?: string;    // Lo guardamos para la vista del carrito, pero no va a la API
 }
 
 // --- PEDIDOS ---
@@ -32,7 +33,7 @@ export interface OrderCustomer {
 }
 
 export interface Order {
-  id: string;
+  _id: string;
   customer: OrderCustomer;
   items: CartItem[];
   deliveryType: 'pickup' | 'delivery';
@@ -52,6 +53,6 @@ export interface OrderRequest {
 
 // --- CUPONES ---
 export interface Coupon {
-  id: string;
+  _id: string;
   code: string;
   Percent: number; }

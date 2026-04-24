@@ -49,7 +49,7 @@ export function ProductList({ products, isLoading, error }: ProductListProps) {
   return (
     <div className="flex flex-col gap-3">
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
+        <ProductCard key={product._id} product={product} />
       ))}
     </div>
   );

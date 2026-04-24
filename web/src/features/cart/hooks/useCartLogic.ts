@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-// Asegurate de que esta ruta apunte a tu cartStore real
 import { useCartStore, CartItemWithExtras } from '@/stores/cartStore'; 
-import { CART_EXTRAS } from '@/features/cart/data/extras';
-import { useCheckout } from '@/features/cart/hooks/useCheckout';
+import { useAddons } from '@/features/menu/hooks/useAddons'; // <-- Traemos los reales
+import { api } from '@/lib/api';
 
 export function useCartLogic() {
   const router = useRouter();
+  const addons = useAddons(); // <-- Instanciamos el hook
 
   // 1. ZUSTAND
   const cartItems = useCartStore((state) => state.items);
@@ -16,20 +16,18 @@ export function useCartLogic() {
   const setAdicional = useCartStore((state) => state.updateAdicional);
   const clearCart = useCartStore((state) => state.clearCart);
   const setOrderData = useCartStore((state) => state.setOrderData);
-  
-  // 1.5 BACKEND MAGIC (Punto 6)
-  const { submitOrder, isLoading: isSubmitting } = useCheckout();
 
   // 2. ESTADOS LOCALES
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'Efectivo' | 'Transferencia'>('Efectivo');
-  // Acá corregimos takeaway por pickup
   const [deliveryType, setDeliveryType] = useState<'pickup' | 'delivery'>('pickup'); 
   const [customerData, setCustomerData] = useState({ name: '', phone: '', address: '' });
   const [formErrors, setFormErrors] = useState({ name: '', phone: '', address: '' });
   
   // 3. CÁLCULOS
   const itemTotal = (item: CartItemWithExtras) => {
-    const adExtra = CART_EXTRAS.reduce((acc, a) => acc + (item.adicionales?.[a.id] || 0) * a.price, 0);
+    // Usamos los addons reales y su _id
+    const adExtra = addons.reduce((acc, a) => acc + (item.adicionales?.[a._id] || 0) * a.price, 0);
     return (item.price + adExtra) * item.quantity;
   };
 
@@ -51,6 +49,7 @@ export function useCartLogic() {
   };
 
   const handleConfirmOrder = async () => {
+    // --- VALIDACIONES ---
     let isValid = true;
     const newErrors = { name: '', phone: '', address: '' };
 
@@ -76,7 +75,7 @@ export function useCartLogic() {
       return; 
     }
 
-    // Actualizamos el estado global antes de mandar
+    // --- GUARDAMOS DATOS DEL CLIENTE ---
     setOrderData({
       ...orderData,
       name: customerData.name,
@@ -86,18 +85,57 @@ export function useCartLogic() {
       paymentMethod: paymentMethod
     });
 
-    // ¡DISPARAMOS EL PEDIDO AL BACKEND DE AARON!
-    // Fijate que borré toda la lógica de "detalleProductos", ya no hace falta.
-    const result = await submitOrder();
+    setIsSubmitting(true);
 
-    if (result.success) {
-      router.push('/checkout'); // O a tu página de gracias
-    } else {
-      alert("Hubo un error al enviar el pedido. Por favor, intentá de nuevo.");
+    try {
+      // --- TRADUCCIÓN PARA LA API ---
+      const itemsParaLaApi = cartItems.map(item => {
+        const addonsArray = Object.entries(item.adicionales || {})
+          .filter(([_, qty]) => (qty as number) > 0)
+          .map(([addonId, qty]) => ({
+            addonId: String(addonId),
+            quantity: Number(qty)
+          }));
+
+        const apiItem: any = {
+          productId: item.productId,
+          quantity: Number(item.quantity)
+        };
+
+        if (addonsArray.length > 0) {
+          apiItem.addons = addonsArray;
+        }
+
+        return apiItem;
+      });
+
+      const payload = {
+        customer: {
+          name: customerData.name,
+          phone: customerData.phone,
+          address: deliveryType === 'delivery' ? customerData.address : undefined
+        },
+        items: itemsParaLaApi,
+        deliveryType: deliveryType,
+        paymentMethod: paymentMethod
+      };
+
+      // --- DISPARAMOS LA PETICIÓN ---
+      const response = await api.post<any>('/api/orders', payload);
+
+      if (response.success) {
+        router.push('/checkout'); 
+      } else {
+        alert("Error al crear el pedido: " + response.error);
+      }
+    } catch (error) {
+      console.error("Error confirmando pedido:", error);
+      alert("Hubo un error de conexión al enviar tu pedido.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  // 5. RETORNAMOS LO QUE LA VISTA NECESITA
   return {
     cartItems,
     paymentMethod, setPaymentMethod,

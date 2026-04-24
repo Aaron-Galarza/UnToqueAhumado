@@ -2,7 +2,7 @@
 
 import { Plus } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Product } from "../types/product";
+import { Product } from "@/types/index";
 import { useCartStore } from '@/stores/cartStore';
 
 interface ProductCardProps {
@@ -13,19 +13,17 @@ export function ProductCard({ product }: ProductCardProps) {
 
   const addItem = useCartStore((state) => state.addItem);
 
-  const handleAddToCart = () => {
-    // Aaron: este payload es el "contrato" con el carrito. Si el backend manda otra estructura, conviene adaptarla antes de llegar acá.
+ const handleAddToCart = () => {
     // Armamos el "paquete" con el formato exacto que pide el Carrito
     addItem({
-      id: product.id,
-      name: product.title, 
+      productId: product._id, // El carrito espera 'productId', y le damos el _id de la BD
+      title: product.title,   // El carrito espera 'title', no 'name'
       price: product.price,
       image: product.image,
-      category: product.category,
       quantity: 1, 
       adicionales: {}, 
+      category: product.category
     });  
-
   };
 
   return (
