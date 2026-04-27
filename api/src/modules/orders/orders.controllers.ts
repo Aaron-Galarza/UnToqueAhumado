@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import * as OrderService from './orders.service'
 import { sendError, sendSucces } from '../../utils/response'
 import { validOrderStatus, OrderStatus, validPaymentMethods, PaymentMethod } from './orders.model'
+import { getIO } from '../../socket/socket'
 
 export const createOrder = async (req: Request, res: Response) => {
   try {
@@ -42,6 +43,7 @@ export const createOrder = async (req: Request, res: Response) => {
     }
 
     const order = await OrderService.createOrder(req.body)
+    getIO().to('admins').emit('new-order', order)
     return sendSucces(res, order, 201)
   } catch (error: any) {
     // Errores de negocio lanzados desde el service (cupón inválido, producto inexistente, etc.)
@@ -76,6 +78,7 @@ export const updateStatusOrder = async (req: Request, res: Response) => {
 
     if (!order) return sendError(res, 'Pedido no encontrado', 404)
 
+    getIO().to('admins').emit('order-updated', { id, status })
     return sendSucces(res, order, 200)
   } catch (error: any) {
     console.error(`[ERROR] updateStatusOrder - ${error?.message}`)

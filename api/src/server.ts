@@ -1,14 +1,19 @@
 import dotenv from 'dotenv'
+import { createServer } from 'http'
 import app from './app'
-import { connectDB } from './config/config'; // Importas la función
+import { connectDB } from './config/config'
+import { initSocket } from './socket/socket'
 
 dotenv.config()
 
 const PORT = process.env.PORT || 4000
 
+const httpServer = createServer(app)
+
+initSocket(httpServer)
+
 connectDB()
 
-app.listen(PORT, () => {
-    console.log(`server corriendo en http://localhost:${PORT}`)
-
+httpServer.listen(PORT, () => {
+  console.log(`server corriendo en http://localhost:${PORT}`)
 })
