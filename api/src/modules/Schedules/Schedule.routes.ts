@@ -6,6 +6,6 @@ const router = Router();
 
 // Endpoint público para que el Front sepa si mostrar el botón de "Comprar"
 router.get('/status', getStatus);
-router.put('/status', closeStore, isAdmin)
+router.put('/status', isAdmin, closeStore,)
 
 export default router;
