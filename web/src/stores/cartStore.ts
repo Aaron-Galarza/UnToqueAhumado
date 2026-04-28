@@ -9,6 +9,7 @@ export interface OrderData {
   address: string;
   deliveryType: 'pickup' | 'delivery'; 
   couponCode?: string; 
+  couponPercent?: number;
   paymentMethod: 'Efectivo' | 'Transferencia'; }
 
 export interface CartItemWithExtras extends CartItem {

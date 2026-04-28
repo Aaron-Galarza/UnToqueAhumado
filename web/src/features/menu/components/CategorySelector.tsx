@@ -1,6 +1,9 @@
 "use client";
 
-// Aaron: estas categorías están hardcodeadas a propósito. Si mañana salen de un endpoint, solo cambiamos este array y el resto del componente sigue igual.
+import { Utensils, CupSoda, IceCream, Pizza } from 'lucide-react';
+import { Category } from '../hooks/useCategories';
+
+// TUS ÍCONOS ORIGINALES
 const BurgerIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M4 10.5C4 9.4 4.9 8.5 6 8.5H18C19.1 8.5 20 9.4 20 10.5V11.5H4V10.5Z" fill="currentColor"/>
@@ -32,40 +35,73 @@ const FriesIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const categories = [
-  { name: "Promos", Icon: PromoIcon },
-  { name: "Hamburguesas Artesanales", Icon: BurgerIcon }, 
-  { name: "Acompañamientos", Icon: FriesIcon }
-];
+// 📖 EL DICCIONARIO DE ÍCONOS (Clave en minúsculas y sin acentos)
+const ICON_DICTIONARY: Record<string, React.FC<{className?: string}>> = {
+  'promos': PromoIcon,
+  'hamburguesas artesanales': BurgerIcon,
+  'acompanamientos': FriesIcon,
+  'bebidas': CupSoda,     // <-- Ejemplo genérico para el futuro
+};
 
+// MOTOR DE BÚSQUEDA DEL DICCIONARIO
+const getCategoryIcon = (categoryName: string) => {
+  const normalized = categoryName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+  
+  for (const [key, Icon] of Object.entries(ICON_DICTIONARY)) {
+    const normalizedKey = key.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (normalized.includes(normalizedKey)) return Icon;
+  }
+  
+  return Utensils; // El comodín si no encontramos nada
+};
+
+// NUEVAS PROPS: Ahora recibe la data de afuera
 interface CategorySelectorProps {
+  categories: Category[];
+  isLoading: boolean;
   activeCategory: string;
   onSelectCategory: (category: string) => void;
 }
 
-export function CategorySelector({ activeCategory, onSelectCategory }: CategorySelectorProps) {
+export function CategorySelector({ categories, isLoading, activeCategory, onSelectCategory }: CategorySelectorProps) {
+  
+  if (isLoading) {
+    return (
+      <div className="flex w-full overflow-x-auto gap-3 pt-1 pb-4 px-4 justify-center opacity-50 animate-pulse">
+        <div className="w-20 md:w-24 h-24 bg-card rounded-2xl border border-border"></div>
+        <div className="w-20 md:w-24 h-24 bg-card rounded-2xl border border-border"></div>
+        <div className="w-20 md:w-24 h-24 bg-card rounded-2xl border border-border"></div>
+      </div>
+    );
+  }
+
+  if (categories.length === 0) return null;
+
   return (
-    // ¡BOM! Un solo justify-center para que sea el rey de la simetría en cualquier celular.
     <div className="flex w-full overflow-x-auto scrollbar-hide gap-3 md:gap-6 snap-x pt-1 pb-4 px-4 justify-center">
-      {categories.map((c) => (
-        <button
-          key={c.name}
-          onClick={() => onSelectCategory(c.name)}
-          className={`snap-center flex flex-col items-center w-20 md:w-24 shrink-0 gap-2 transition-all duration-300 ${
-            activeCategory === c.name ? 'text-primary scale-105' : 'text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <div className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center transition-colors border shadow-sm ${
-            activeCategory === c.name ? 'border-primary bg-background shadow-md' : 'border-border bg-card'
-          }`}>
-            <c.Icon className="w-7 h-7 md:w-8 md:h-8" />
-          </div>
-          
-          <span className="text-[10px] md:text-xs font-bold text-center leading-[1.1]">
-            {c.name}
-          </span>
-        </button>
-      ))}
+      {categories.map((c) => {
+        const IconComponent = getCategoryIcon(c.name);
+        
+        return (
+          <button
+            key={c._id}
+            onClick={() => onSelectCategory(c.name)}
+            className={`snap-center flex flex-col items-center w-20 md:w-24 shrink-0 gap-2 transition-all duration-300 ${
+              activeCategory === c.name ? 'text-primary scale-105' : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <div className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center transition-colors border shadow-sm ${
+              activeCategory === c.name ? 'border-primary bg-background shadow-md' : 'border-border bg-card'
+            }`}>
+              <IconComponent className="w-7 h-7 md:w-8 md:h-8" />
+            </div>
+            
+            <span className="text-[10px] md:text-xs font-bold text-center leading-[1.1]">
+              {c.name}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }

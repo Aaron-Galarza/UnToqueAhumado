@@ -32,7 +32,9 @@ export function useCartLogic() {
   };
 
   const subtotal = cartItems.reduce((acc, item) => acc + itemTotal(item), 0);
-  const discount = orderData.couponCode ? subtotal * 0.10 : 0; 
+ const discount = orderData.couponPercent 
+    ? subtotal * (orderData.couponPercent / 100) 
+    : 0;
   const deliveryFee = deliveryType === 'delivery' ? 'a convenir' : 0;
   const total = subtotal - discount + (typeof deliveryFee === 'number' ? deliveryFee : 0);
 
@@ -85,6 +87,7 @@ export function useCartLogic() {
       paymentMethod: paymentMethod
     });
 
+    
     setIsSubmitting(true);
 
     try {
@@ -117,7 +120,8 @@ export function useCartLogic() {
         },
         items: itemsParaLaApi,
         deliveryType: deliveryType,
-        paymentMethod: paymentMethod
+        paymentMethod: paymentMethod,
+        couponCode: orderData.couponCode
       };
 
       // --- DISPARAMOS LA PETICIÓN ---

@@ -1,59 +1,65 @@
 import { useState } from 'react';
 import { api } from '@/lib/api';
-import { Coupon } from '@/types';
-import { useCartStore } from '@/stores/cartStore'; 
+import { useCartStore } from '@/stores/cartStore';
 
 export function useCoupon() {
   const [couponCode, setCouponCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
 
-  // Traemos el store del carrito para guardar el cupón si es válido
-  const orderData = useCartStore(state => state.orderData);
-  const setOrderData = useCartStore(state => state.setOrderData);
+  // Traemos el cerebro de Zustand
+  const orderData = useCartStore((state) => state.orderData);
+  const setOrderData = useCartStore((state) => state.setOrderData);
+
+  // Armamos el objeto para la vista si es que ya hay un cupón guardado
+  const appliedCoupon = orderData.couponCode ? {
+    code: orderData.couponCode,
+    Percent: orderData.couponPercent || 0
+  } : null;
 
   const validateCoupon = async () => {
-    if (!couponCode.trim()) {
-      setError('Escribí un código primero');
-      return;
-    }
-
+    if (!couponCode.trim()) return;
+    
     setIsLoading(true);
     setError(null);
+    const code = couponCode.trim().toUpperCase();
 
-    // Le pegamos a la API de Aaron. Como el código va en la URL, el body va vacío {}
-    const response = await api.post<Coupon>(`/api/coupons/validate/${couponCode.toUpperCase()}`, {});
+    try {
+      // Le pegamos al endpoint de Aaron con el parámetro en la URL
+      const response = await api.post<any>(`/api/coupons/validate/${code}`, {});
 
-    if (response.success && response.data) {
-      setAppliedCoupon(response.data);
-      // ¡Éxito! Lo guardamos en el estado global para el Checkout
-      setOrderData({ ...orderData, couponCode: response.data.code });
-      setError(null);
-    } else {
-      setAppliedCoupon(null);
-      // Si falla, limpiamos el código del store por las dudas
-      setOrderData({ ...orderData, couponCode: undefined });
-      setError(response.error || 'Cupón inválido o expirado');
+      if (response.success && response.data) {
+        // Guardamos en Zustand el código Y el porcentaje
+        setOrderData({
+          ...orderData,
+          couponCode: response.data.code,
+          couponPercent: response.data.Percent // Aaron lo manda con P mayúscula
+        });
+        setCouponCode(''); // Limpiamos el input
+      } else {
+        setError('Cupón inválido o expirado.');
+      }
+    } catch (err) {
+      setError('Error al validar el cupón.');
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const removeCoupon = () => {
-    setCouponCode('');
-    setAppliedCoupon(null);
+    // Para borrarlo, simplemente pisamos las variables con undefined
+    setOrderData({
+      ...orderData,
+      couponCode: undefined,
+      couponPercent: undefined
+    });
     setError(null);
-    setOrderData({ ...orderData, couponCode: undefined });
   };
 
   return {
-    couponCode,
-    setCouponCode,
-    isLoading,
-    error,
+    couponCode, setCouponCode,
+    isLoading, error,
     appliedCoupon,
-    validateCoupon,
-    removeCoupon
+    validateCoupon, removeCoupon
   };
 }
