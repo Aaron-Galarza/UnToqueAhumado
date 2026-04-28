@@ -5,7 +5,7 @@ import { stat } from 'fs';
 export const checkStoreStatus = async () => {
     const config = await ConfigModel.getOrCreateConfig();
     
-    if (config.isAllClose) return { isClose: true, message: "Cerrado por falta de stock o fuerza mayor" };
+    if (config.isAllClose) return { isClose: true, message: "Negocio cerrado" };
 
     const now = new Date();
     // Ajuste de hora: MongoDB suele usar UTC, asegurate de manejar la hora local de Argentina
