@@ -42,7 +42,7 @@ export function useAdminProducts() {
     const response = await api.put<Product>(`/api/productos/admin/${id}`, productData);
     if (response.success && response.data) {
       // Actualizamos solo el producto que cambió en nuestra lista visual
-      setProducts(prev => prev.map(p => p.id === id ? response.data! : p));
+      setProducts(prev => prev.map(p => p._id === id ? response.data! : p));
       return { success: true };
     }
     return { success: false, error: response.error };
@@ -52,7 +52,7 @@ export function useAdminProducts() {
   const toggleActive = async (id: string) => {
     const response = await api.put<Product>(`/api/productos/admin/toggleActive/${id}`, {});
     if (response.success && response.data) {
-      setProducts(prev => prev.map(p => p.id === id ? response.data! : p));
+      setProducts(prev => prev.map(p => p._id === id ? response.data! : p));
       return { success: true };
     }
     return { success: false, error: response.error };
@@ -63,7 +63,7 @@ export function useAdminProducts() {
     const response = await api.delete<boolean>(`/api/productos/admin/${id}`);
     if (response.success) {
       // Lo sacamos de la lista visual
-      setProducts(prev => prev.filter(p => p.id !== id));
+      setProducts(prev => prev.filter(p => p._id !== id));
       return { success: true };
     }
     return { success: false, error: response.error };
