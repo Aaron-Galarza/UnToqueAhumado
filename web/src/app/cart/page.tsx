@@ -11,14 +11,17 @@ import { CouponInput } from '@/features/cart/components/CouponInput';
 import { CartSummary } from '@/features/cart/components/CartSummary';
 import { ConfirmButton } from '@/features/cart/components/ConfirmButton';
 import { PaymentSelector } from '@/features/cart/components/PaymentSelector';
+import { useState } from 'react';
 
 export default function CartPage() {
+  const [isConfirmingClear, setIsConfirmingClear] = useState(false);
   // Extraemos las variables actualizadas del hook, eliminando las obsoletas (ej. promoCode)
   const {
     cartItems, paymentMethod, setPaymentMethod, deliveryType, setDeliveryType,
     customerData, formErrors, subtotal, discount, deliveryFee, total,
     handleRemoveItem, updateMainQuantity, setAdicional, handleCustomerDataChange, 
-    handleClearCart, handleConfirmOrder, isSubmitting, orderData, router
+    handleClearCart, handleConfirmOrder, isSubmitting, orderData, router,
+    submitMessage, submitType
   } = useCartLogic();
 
   return (
@@ -39,9 +42,16 @@ export default function CartPage() {
         <div className="flex flex-col gap-4 mb-8">
           {cartItems.length > 0 && (
             <div className="flex justify-end -mb-2">
-              <button onClick={handleClearCart} className="text-sm font-bold text-muted-foreground hover:text-red-500 transition-colors flex items-center gap-1.5 cursor-pointer">
-                <Trash2 className="w-4 h-4" /> Vaciar carrito
-              </button>
+              {!isConfirmingClear ? (
+                <button onClick={() => setIsConfirmingClear(true)} className="text-sm font-bold text-muted-foreground hover:text-red-500 transition-colors flex items-center gap-1.5 cursor-pointer">
+                  <Trash2 className="w-4 h-4" /> Vaciar carrito
+                </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <button onClick={() => { handleClearCart(); setIsConfirmingClear(false); }} className="text-sm font-bold text-red-600 transition-colors cursor-pointer">Confirmar</button>
+                  <button onClick={() => setIsConfirmingClear(false)} className="text-sm font-bold text-muted-foreground transition-colors cursor-pointer">Cancelar</button>
+                </div>
+              )}
             </div>
           )}
 
@@ -76,6 +86,11 @@ export default function CartPage() {
             <PaymentSelector paymentMethod={paymentMethod} onChange={setPaymentMethod} />
             
             <CouponInput />
+            {submitType && submitMessage && (
+              <div className={`rounded-lg border px-3 py-2 text-sm font-semibold ${submitType === 'error' ? 'bg-red-50 border-red-200 text-red-700' : 'bg-green-50 border-green-200 text-green-700'}`}>
+                {submitMessage}
+              </div>
+            )}
 
             <CartSummary 
               subtotal={subtotal} 
@@ -83,6 +98,7 @@ export default function CartPage() {
               deliveryFee={deliveryFee} 
               total={total} 
               discountApplied={!!orderData.couponCode} 
+              discountPercentage={orderData.couponPercent}
               deliveryType={deliveryType} 
             />
 

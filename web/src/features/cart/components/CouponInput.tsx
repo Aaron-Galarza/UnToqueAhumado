@@ -5,7 +5,7 @@ import { useCoupon } from '@/features/cart/hooks/useCoupon';
 export function CouponInput() {
   const { 
     couponCode, setCouponCode, isLoading, error, 
-    appliedCoupon, validateCoupon, removeCoupon 
+    successMessage, appliedCoupon, validateCoupon, removeCoupon 
   } = useCoupon();
 
   return (
@@ -41,6 +41,7 @@ export function CouponInput() {
             </button>
           </div>
           {error && <p className="text-red-500 text-xs mt-2 font-medium">{error}</p>}
+          {successMessage && <p className="text-green-600 text-xs mt-2 font-medium">{successMessage}</p>}
         </div>
       )}
     </div>

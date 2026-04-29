@@ -1,14 +1,19 @@
+"use client";
+
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useCartStore, CartItemWithExtras } from '@/stores/cartStore'; 
-import { useAddons } from '@/features/menu/hooks/useAddons'; // <-- Traemos los reales
+import { useCartStore, CartItemWithExtras } from '@/stores/cartStore';
 import { api } from '@/lib/api';
+import { Product } from '@/types';
+import { Addon, useAddons } from '@/features/menu/hooks/useAddons';
+
+type FeedbackType = 'error' | 'success' | null;
 
 export function useCartLogic() {
   const router = useRouter();
-  const addons = useAddons(); // <-- Instanciamos el hook
+  const { addons } = useAddons();
 
-  // 1. ZUSTAND
+  // --- ZONA DE ESTADOS GLOBALES ---
   const cartItems = useCartStore((state) => state.items);
   const orderData = useCartStore((state) => state.orderData);
   const handleRemoveItem = useCartStore((state) => state.removeItem);
@@ -16,141 +21,151 @@ export function useCartLogic() {
   const setAdicional = useCartStore((state) => state.updateAdicional);
   const clearCart = useCartStore((state) => state.clearCart);
   const setOrderData = useCartStore((state) => state.setOrderData);
+  const setItems = useCartStore((state) => state.setItems);
 
-  // 2. ESTADOS LOCALES
+  // --- ZONA DE ESTADOS LOCALES ---
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'Efectivo' | 'Transferencia'>('Efectivo');
-  const [deliveryType, setDeliveryType] = useState<'pickup' | 'delivery'>('pickup'); 
-  const [customerData, setCustomerData] = useState({ name: '', phone: '', address: '' });
+  const [paymentMethod, setPaymentMethod] = useState<'Efectivo' | 'Transferencia'>(orderData.paymentMethod || 'Efectivo');
+  const [deliveryType, setDeliveryType] = useState<'pickup' | 'delivery'>(orderData.deliveryType || 'pickup');
+  const [customerData, setCustomerData] = useState({
+    name: orderData.name || '',
+    phone: orderData.phone || '',
+    address: orderData.address || '',
+  });
   const [formErrors, setFormErrors] = useState({ name: '', phone: '', address: '' });
-  
-  // 3. CÁLCULOS
+  const [submitMessage, setSubmitMessage] = useState('');
+  const [submitType, setSubmitType] = useState<FeedbackType>(null);
+
+  // --- CÁLCULOS ---
   const itemTotal = (item: CartItemWithExtras) => {
-    // Usamos los addons reales y su _id
     const adExtra = addons.reduce((acc, a) => acc + (item.adicionales?.[a._id] || 0) * a.price, 0);
     return (item.price + adExtra) * item.quantity;
   };
 
   const subtotal = cartItems.reduce((acc, item) => acc + itemTotal(item), 0);
- const discount = orderData.couponPercent 
-    ? subtotal * (orderData.couponPercent / 100) 
-    : 0;
+  const discount = orderData.couponPercent ? subtotal * (orderData.couponPercent / 100) : 0;
   const deliveryFee = deliveryType === 'delivery' ? 'a convenir' : 0;
   const total = subtotal - discount + (typeof deliveryFee === 'number' ? deliveryFee : 0);
 
-  // 4. HANDLERS
+  // --- HANDLERS BÁSICOS ---
   const handleCustomerDataChange = (field: keyof typeof customerData, value: string) => {
-    setCustomerData(prev => ({ ...prev, [field]: value }));
-    if (formErrors[field]) setFormErrors(prev => ({ ...prev, [field]: '' }));
+    setCustomerData((prev) => ({ ...prev, [field]: value }));
+    if (formErrors[field]) setFormErrors((prev) => ({ ...prev, [field]: '' }));
+    if (submitType) { setSubmitType(null); setSubmitMessage(''); }
   };
 
-  const handleClearCart = () => {
-    if (window.confirm('¿Estás seguro que querés vaciar todo el carrito?')) {
-      clearCart();
-    }
-  };
+  const handleClearCart = () => clearCart();
 
-  const handleConfirmOrder = async () => {
-    // --- VALIDACIONES ---
+  // --- LÓGICA DE NEGOCIO (REFACTORIZADA) ---
+  const validateForm = () => {
     let isValid = true;
     const newErrors = { name: '', phone: '', address: '' };
 
-    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
-    if (customerData.name.trim().length < 3) {
-      newErrors.name = 'Mínimo 3 letras.'; isValid = false;
-    } else if (!nameRegex.test(customerData.name)) {
-      newErrors.name = 'Solo letras.'; isValid = false;
-    }
+    if (customerData.name.trim().length < 3) { newErrors.name = 'Mínimo 3 letras.'; isValid = false; }
+    else if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(customerData.name)) { newErrors.name = 'Solo letras.'; isValid = false; }
 
-    const phoneRegex = /^\+?[0-9]{8,15}$/;
-    if (!phoneRegex.test(customerData.phone.replace(/\s/g, ''))) {
-      newErrors.phone = 'Celular inválido.'; isValid = false;
-    }
+    if (!/^\+?[0-9]{8,15}$/.test(customerData.phone.replace(/\s/g, ''))) { newErrors.phone = 'Celular inválido.'; isValid = false; }
+    if (deliveryType === 'delivery' && customerData.address.trim().length < 5) { newErrors.address = 'Dirección muy corta.'; isValid = false; }
 
-    if (deliveryType === 'delivery' && customerData.address.trim().length < 5) {
-      newErrors.address = 'Dirección muy corta.'; isValid = false;
-    }
+    return { isValid, newErrors };
+  };
+
+  const syncCartWithBackend = async () => {
+    const [productsResp, addonsResp] = await Promise.all([
+      api.get<Product[]>('/api/productos'),
+      api.get<Addon[]>('/api/adicionales'),
+    ]);
+
+    if (!productsResp.success || !productsResp.data) throw new Error(productsResp.error || 'Error validando productos.');
+    if (!addonsResp.success || !addonsResp.data) throw new Error(addonsResp.error || 'Error validando adicionales.');
+
+    const productsMap = new Map(productsResp.data.map((p) => [p._id, p]));
+    const addonsMap = new Map(addonsResp.data.map((a) => [a._id, a]));
+    const missingProducts: string[] = [];
+
+    const syncedItems: CartItemWithExtras[] = cartItems.map((item) => {
+      const product = productsMap.get(item.productId);
+      if (!product) { missingProducts.push(item.title); return item; }
+
+      const filteredExtras = Object.entries(item.adicionales || {}).reduce<Record<string, number>>((acc, [id, qty]) => {
+        if (qty > 0 && addonsMap.has(id)) acc[id] = qty;
+        return acc;
+      }, {});
+
+      return { ...item, title: product.title, price: product.price, adicionales: filteredExtras };
+    });
+
+    if (missingProducts.length > 0) throw new Error(`Sin disponibilidad: ${missingProducts.join(', ')}`);
+    setItems(syncedItems);
+    return syncedItems;
+  };
+
+  const handleConfirmOrder = async () => {
+    const { isValid, newErrors } = validateForm();
 
     if (!isValid) {
       setFormErrors(newErrors);
+      setSubmitType('error');
+      setSubmitMessage('Revisá los campos obligatorios antes de continuar.');
       window.scrollTo({ top: 300, behavior: 'smooth' });
-      return; 
+      return;
     }
 
-    // --- GUARDAMOS DATOS DEL CLIENTE ---
-    setOrderData({
-      ...orderData,
-      name: customerData.name,
-      phone: customerData.phone,
-      address: customerData.address,
-      deliveryType: deliveryType,
-      paymentMethod: paymentMethod
-    });
-
-    
+    setOrderData({ ...orderData, name: customerData.name, phone: customerData.phone, address: customerData.address, deliveryType, paymentMethod });
     setIsSubmitting(true);
+    setSubmitType(null);
 
     try {
-      // --- TRADUCCIÓN PARA LA API ---
-      const itemsParaLaApi = cartItems.map(item => {
-        const addonsArray = Object.entries(item.adicionales || {})
-          .filter(([_, qty]) => (qty as number) > 0)
-          .map(([addonId, qty]) => ({
-            addonId: String(addonId),
-            quantity: Number(qty)
-          }));
-
-        const apiItem: any = {
-          productId: item.productId,
-          quantity: Number(item.quantity)
-        };
-
-        if (addonsArray.length > 0) {
-          apiItem.addons = addonsArray;
-        }
-
-        return apiItem;
-      });
+      const syncedItems = await syncCartWithBackend();
 
       const payload = {
         customer: {
           name: customerData.name,
           phone: customerData.phone,
-          address: deliveryType === 'delivery' ? customerData.address : undefined
+          address: deliveryType === 'delivery' ? customerData.address : undefined,
         },
-        items: itemsParaLaApi,
-        deliveryType: deliveryType,
-        paymentMethod: paymentMethod,
-        couponCode: orderData.couponCode
+        items: syncedItems.map((item) => {
+          const addons = Object.entries(item.adicionales || {})
+            .filter(([, qty]) => Number(qty) > 0)
+            .map(([addonId, quantity]) => ({ addonId, quantity: Number(quantity) }));
+            
+          return addons.length > 0 
+            ? { productId: item.productId, quantity: Number(item.quantity), addons }
+            : { productId: item.productId, quantity: Number(item.quantity) };
+        }),
+        deliveryType,
+        paymentMethod,
+        couponCode: orderData.couponCode,
       };
 
-      // --- DISPARAMOS LA PETICIÓN ---
-      const response = await api.post<any>('/api/orders', payload);
+      const response = await api.post<{ _id: string }>('/api/orders', payload);
 
       if (response.success) {
-        router.push('/checkout'); 
+        setSubmitType('success');
+        setSubmitMessage('Pedido validado y enviado correctamente.');
+        router.push('/checkout');
       } else {
-        alert("Error al crear el pedido: " + response.error);
+        setSubmitType('error');
+        setSubmitMessage(
+          response.status === 400 ? (response.error || 'Datos inválidos.') :
+          response.status === 404 ? 'No se encontró un producto o adicional.' :
+          response.status === 500 ? 'Error interno del servidor.' :
+          (response.error || 'Hubo un error al enviar el pedido.')
+        );
       }
     } catch (error) {
-      console.error("Error confirmando pedido:", error);
-      alert("Hubo un error de conexión al enviar tu pedido.");
+      setSubmitType('error');
+      setSubmitMessage(error instanceof Error ? error.message : 'Error de red al enviar pedido.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return {
-    cartItems,
-    paymentMethod, setPaymentMethod,
-    deliveryType, setDeliveryType,
-    customerData,
-    formErrors,
-    subtotal, discount, deliveryFee, total,
-    handleRemoveItem, updateMainQuantity, setAdicional,
-    handleCustomerDataChange, handleClearCart, handleConfirmOrder,
-    isSubmitting, 
-    orderData,
-    router
+    cartItems, paymentMethod, setPaymentMethod, deliveryType, setDeliveryType,
+    customerData, formErrors, subtotal, discount, deliveryFee, total,
+    handleRemoveItem, updateMainQuantity, setAdicional, handleCustomerDataChange,
+    handleClearCart, handleConfirmOrder, isSubmitting, orderData, router,
+    submitMessage, submitType,
   };
 }

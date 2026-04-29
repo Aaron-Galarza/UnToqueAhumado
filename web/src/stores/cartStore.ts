@@ -20,6 +20,7 @@ interface CartState {
   items: CartItemWithExtras[];
   orderData: OrderData; 
   addItem: (item: CartItemWithExtras) => void;
+  setItems: (items: CartItemWithExtras[]) => void;
   // 4. Pasamos los IDs a productId (string)
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, delta: number) => void;
@@ -54,6 +55,8 @@ export const useCartStore = create<CartState>()(
         }
         return { items: [...state.items, newItem] };
       }),
+
+      setItems: (items) => set({ items }),
 
       // Filtramos usando productId
       removeItem: (productId) => set((state) => ({

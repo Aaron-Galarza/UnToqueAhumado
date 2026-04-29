@@ -13,9 +13,9 @@ export function ExtrasSelector({ itemId, adicionales, onUpdateAdicional }: Extra
   const fmt = (n: number) => '$' + Math.round(n).toLocaleString('es-AR');
   
   // 3. Obtenemos los adicionales reales
-  const addons = useAddons();
+  const { addons, isLoading: addonsLoading } = useAddons();
 
-  if (addons.length === 0) {
+  if (addonsLoading) {
     return <div className="mt-3 text-xs text-muted-foreground text-center animate-pulse">Buscando adicionales...</div>;
   }
 

@@ -6,60 +6,72 @@ export function useCoupon() {
   const [couponCode, setCouponCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Traemos el cerebro de Zustand
   const orderData = useCartStore((state) => state.orderData);
   const setOrderData = useCartStore((state) => state.setOrderData);
 
-  // Armamos el objeto para la vista si es que ya hay un cupón guardado
-  const appliedCoupon = orderData.couponCode ? {
-    code: orderData.couponCode,
-    Percent: orderData.couponPercent || 0
-  } : null;
+  const appliedCoupon = orderData.couponCode
+    ? {
+        code: orderData.couponCode,
+        Percent: orderData.couponPercent || 0,
+      }
+    : null;
 
   const validateCoupon = async () => {
     if (!couponCode.trim()) return;
-    
+
     setIsLoading(true);
     setError(null);
+    setSuccessMessage(null);
     const code = couponCode.trim().toUpperCase();
 
     try {
-      // Le pegamos al endpoint de Aaron con el parámetro en la URL
-      const response = await api.post<any>(`/api/coupons/validate/${code}`, {});
+      const response = await api.post<CouponValidation>(`/api/coupons/validate/${code}`, {});
 
       if (response.success && response.data) {
-        // Guardamos en Zustand el código Y el porcentaje
         setOrderData({
           ...orderData,
           couponCode: response.data.code,
-          couponPercent: response.data.Percent // Aaron lo manda con P mayúscula
+          couponPercent: response.data.Percent,
         });
-        setCouponCode(''); // Limpiamos el input
-      } else {
+        setCouponCode('');
+        setSuccessMessage(`Cupón ${response.data.code} aplicado correctamente.`);
+      } else if (response.status === 400) {
         setError('Cupón inválido o expirado.');
+      } else if (response.status === 404) {
+        setError('No se encontró el cupón.');
+      } else if (response.status === 500) {
+        setError('El servidor no pudo validar el cupón.');
+      } else {
+        setError(response.error || 'Error al validar el cupón.');
       }
-    } catch (err) {
-      setError('Error al validar el cupón.');
+    } catch {
+      setError('Error de red al validar el cupón.');
     } finally {
       setIsLoading(false);
     }
   };
 
   const removeCoupon = () => {
-    // Para borrarlo, simplemente pisamos las variables con undefined
     setOrderData({
       ...orderData,
       couponCode: undefined,
-      couponPercent: undefined
+      couponPercent: undefined,
     });
     setError(null);
+    setSuccessMessage(null);
   };
 
   return {
-    couponCode, setCouponCode,
-    isLoading, error,
+    couponCode,
+    setCouponCode,
+    isLoading,
+    error,
+    successMessage,
     appliedCoupon,
-    validateCoupon, removeCoupon
+    validateCoupon,
+    removeCoupon,
   };
 }
+  type CouponValidation = { code: string; Percent: number };

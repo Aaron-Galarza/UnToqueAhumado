@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 export interface Coupon {
-  id?: string; 
-  _id?: string; 
+  id?: string;
+  _id?: string;
   code: string;
   Percent: number;
 }
@@ -12,14 +13,10 @@ export function useAdminCoupons() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 1. TRAER CUPONES
   const fetchCoupons = useCallback(async () => {
     setIsLoading(true);
     const response = await api.get<Coupon[]>('/api/coupons/admin');
-    
-    if (response.success && response.data) {
-      setCoupons(response.data);
-    }
+    if (response.success && response.data) setCoupons(response.data);
     setIsLoading(false);
   }, []);
 
@@ -27,40 +24,28 @@ export function useAdminCoupons() {
     fetchCoupons();
   }, [fetchCoupons]);
 
-  // 2. CREAR CUPÓN
   const createCoupon = async (code: string, Percent: number) => {
-const response = await api.post<Coupon>('/api/coupons/admin', { 
-      Code: code, 
-      Percent: Percent 
-    });
+    const response = await api.post<Coupon>('/api/coupons/admin', { Code: code, Percent });
     if (response.success) {
-      fetchCoupons(); // Recargamos la lista si se creó bien
+      fetchCoupons();
+      toast.success('Cupón creado.');
       return true;
-    } else {
-      alert(`Error al crear cupón: ${response.error}`);
-      return false;
     }
+    toast.error(`Error al crear cupón: ${response.error}`);
+    return false;
   };
 
-  // 3. ELIMINAR CUPÓN
   const deleteCoupon = async (id: string) => {
-    if (!window.confirm('¿Seguro que querés borrar este cupón?')) return;
-    
-    // Optimistic UI: lo borramos localmente primero para que sea rápido
-    setCoupons(prev => prev.filter(c => c.id !== id && c._id !== id));
-    
+    setCoupons((prev) => prev.filter((c) => c.id !== id && c._id !== id));
     const response = await api.delete(`/api/coupons/admin/${id}`);
     if (!response.success) {
-      alert(`Error al eliminar: ${response.error}`);
-      fetchCoupons(); // Revertimos si falló
+      toast.error(`Error al eliminar: ${response.error}`);
+      fetchCoupons();
+      return false;
     }
+    toast.success('Cupón eliminado.');
+    return true;
   };
 
-  return {
-    coupons,
-    isLoading,
-    createCoupon,
-    deleteCoupon,
-    refreshCoupons: fetchCoupons
-  };
+  return { coupons, isLoading, createCoupon, deleteCoupon, refreshCoupons: fetchCoupons };
 }

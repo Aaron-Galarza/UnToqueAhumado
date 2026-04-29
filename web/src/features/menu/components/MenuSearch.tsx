@@ -5,7 +5,7 @@ import { Search } from "lucide-react";
 interface MenuSearchProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
-  status: any; 
+  status: { message?: string; schedule?: { closeTime: string } } | null;
   isLoading: boolean; 
   isStoreOpen: boolean; // Recibimos el estado limpio
 }

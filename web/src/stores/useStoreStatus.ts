@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 
 interface StoreStatusResponse {
   isOpen?: boolean;
-  isClose?: boolean; // Agregamos la variable fantasma de Aaron
+  isClose?: boolean;
   message: string;
   schedule?: {
     closeTime: string;
@@ -13,36 +13,39 @@ interface StoreStatusResponse {
 export function useStoreStatus() {
   const [status, setStatus] = useState<StoreStatusResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isStoreOpen, setIsStoreOpen] = useState(false); // Estado limpio para usar en la UI
+  const [isStoreOpen, setIsStoreOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     const fetchStatus = async () => {
       setIsLoading(true);
-      try {
-        const response = await api.get<StoreStatusResponse>('/api/configuracion/status');
-        
-        if (response.success && response.data) {
-          setStatus(response.data);
-          
-          // Lógica a prueba de balas: 
-          // Si Aaron manda isClose en true, está cerrado. Si manda isOpen en true, está abierto.
-          if (response.data.isClose === true) {
-            setIsStoreOpen(false);
-          } else if (response.data.isOpen === true) {
-            setIsStoreOpen(true);
-          } else {
-            setIsStoreOpen(false);
-          }
+      setError(null);
+
+      const response = await api.get<StoreStatusResponse>('/api/configuracion/status');
+
+      if (response.success && response.data) {
+        setStatus(response.data);
+        if (response.data.isClose === true) {
+          setIsStoreOpen(false);
+        } else if (response.data.isOpen === true) {
+          setIsStoreOpen(true);
+        } else {
+          setIsStoreOpen(false);
         }
-      } catch (error) {
-        console.error("Error obteniendo estado del local:", error);
-      } finally {
-        setIsLoading(false);
+      } else if (response.status === 500) {
+        setError('No se pudo verificar el estado del local.');
+      } else {
+        setError(response.error || 'No se pudo verificar el estado del local.');
       }
+
+      setIsLoading(false);
     };
 
     fetchStatus();
-  }, []);
+  }, [reloadKey]);
 
-  return { status, isStoreOpen, isLoading };
+  const retry = () => setReloadKey((prev) => prev + 1);
+
+  return { status, isStoreOpen, isLoading, error, retry };
 }

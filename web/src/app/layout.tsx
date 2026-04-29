@@ -3,6 +3,7 @@ import "./globals.css";
 
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "Un Toque Ahumado | Smash Burgers Premium",
@@ -23,6 +24,7 @@ export default function RootLayout({
         <main className="flex-grow pt-16">
           {children}
         </main>
+        <Toaster position="top-right" />
 
         <Footer />
 

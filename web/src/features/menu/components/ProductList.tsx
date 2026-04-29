@@ -1,51 +1,55 @@
 "use client";
 
-// ¡OJO ACÁ! Fijate que ahora importamos Product de nuestro archivo central
-import { Product } from "@/types"; 
-import { ProductCard } from "./ProductCard";
-import { useCatalog } from '@/features/menu/hooks/useCatalog';
+import { Product } from '@/types';
+import { ProductCard } from './ProductCard';
 
 interface ProductListProps {
   products: Product[];
-  isLoading?: boolean; // Le avisamos si tiene que mostrar el cartel de cargando
-  error?: string | null; // Le avisamos si hubo un problema
+  isLoading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
 }
 
-export function ProductList({ products, isLoading, error }: ProductListProps) {
-  
-  // 1. ESTADO: CARGANDO (Mientras esperamos que Aaron responda)
+export function ProductList({ products, isLoading, error, onRetry }: ProductListProps) {
   if (isLoading) {
     return (
-      <div className="bg-card rounded-2xl border border-border text-center py-16 px-4 shadow-sm mt-4">
-        <p className="text-sm font-bold text-[#FF5500] animate-pulse">
-          Buscando el menú en la cocina...
-        </p>
+      <div className="flex flex-col gap-3 mt-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="bg-card border border-border rounded-2xl p-4 shadow-sm animate-pulse">
+            <div className="h-4 w-2/3 bg-secondary rounded mb-3" />
+            <div className="h-3 w-full bg-secondary rounded mb-2" />
+            <div className="h-3 w-1/2 bg-secondary rounded" />
+          </div>
+        ))}
       </div>
     );
   }
 
-  // 2. ESTADO: ERROR (Si el backend de Aaron está apagado o falla)
   if (error) {
     return (
-      <div className="bg-red-50 rounded-2xl border border-red-200 text-center py-16 px-4 shadow-sm mt-4">
-        <p className="text-sm font-bold text-red-600 mb-1">¡Ups! Tuvimos un problema</p>
-        <p className="text-xs text-red-500">{error}</p>
+      <div className="bg-red-50 rounded-2xl border border-red-200 text-center py-10 px-4 shadow-sm mt-4">
+        <p className="text-sm font-bold text-red-600 mb-1">No se pudo cargar el menú.</p>
+        <p className="text-xs text-red-500 mb-4">{error}</p>
+        {onRetry && (
+          <button
+            onClick={onRetry}
+            className="text-xs font-bold px-3 py-1.5 rounded-md border border-red-300 text-red-700 hover:bg-red-100 transition-colors"
+          >
+            Intentar nuevamente
+          </button>
+        )}
       </div>
     );
   }
 
-  // 3. ESTADO: VACÍO (Si Aaron borró todas las hamburguesas de la base de datos)
   if (!products || products.length === 0) {
     return (
       <div className="bg-card rounded-2xl border border-border text-center py-16 px-4 shadow-sm mt-4">
-        <p className="text-sm font-semibold text-muted-foreground">
-          No encontramos productos para mostrar en este momento.
-        </p>
+        <p className="text-sm font-semibold text-muted-foreground">No encontramos productos para mostrar en este momento.</p>
       </div>
     );
   }
 
-  // 4. ESTADO: ÉXITO (Si todo salió bien, mapeamos las tarjetas)
   return (
     <div className="flex flex-col gap-3">
       {products.map((product) => (

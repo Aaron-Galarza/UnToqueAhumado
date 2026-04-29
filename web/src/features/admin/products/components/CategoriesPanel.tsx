@@ -9,6 +9,7 @@ export function CategoriesPanel() {
   
   const [newCatName, setNewCatName] = useState('');
   const [editingCat, setEditingCat] = useState<Category | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const handleSave = async () => {
     if (!newCatName.trim()) return;
@@ -56,6 +57,7 @@ export function CategoriesPanel() {
           <div className="flex gap-2">
             <input 
               type="text" 
+              maxLength={60}
               value={newCatName} 
               onChange={(e) => setNewCatName(e.target.value)}
               placeholder="Ej: Acompañamientos" 
@@ -92,9 +94,20 @@ export function CategoriesPanel() {
                     <button onClick={() => handleEditClick(cat)} className="p-1 text-gray-400 hover:text-blue-600 transition-colors" title="Editar">
                       <Edit2 className="w-3 h-3" />
                     </button>
-                    <button onClick={() => deleteCategory(cat._id)} className="p-1 text-gray-400 hover:text-red-500 transition-colors" title="Eliminar">
-                      <Trash2 className="w-3 h-3" />
-                    </button>
+                    {confirmDeleteId === cat._id ? (
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => { deleteCategory(cat._id); setConfirmDeleteId(null); }} className="p-1 text-red-600 transition-colors" title="Confirmar">
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                        <button onClick={() => setConfirmDeleteId(null)} className="p-1 text-gray-500 transition-colors" title="Cancelar">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button onClick={() => setConfirmDeleteId(cat._id)} className="p-1 text-gray-400 hover:text-red-500 transition-colors" title="Eliminar">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

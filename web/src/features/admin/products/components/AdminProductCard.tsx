@@ -1,5 +1,6 @@
 import { Edit2, Trash2, Eye, EyeOff } from 'lucide-react';
 import { Product } from '@/types';
+import { useState } from 'react';
 
 interface AdminProductCardProps {
   product: Product;
@@ -10,6 +11,8 @@ interface AdminProductCardProps {
 }
 
 export function AdminProductCard({ product, editingId, toggleProductActive, handleEditClick, deleteProduct }: AdminProductCardProps) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
   return (
     <div className={`bg-gray-50 border rounded-xl p-3 flex items-center gap-3 md:gap-4 group transition-colors ${editingId === product._id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}>
       <img 
@@ -38,9 +41,20 @@ export function AdminProductCard({ product, editingId, toggleProductActive, hand
         <button onClick={() => handleEditClick(product)} className="p-1.5 md:p-2 text-gray-400 hover:text-blue-600 bg-white hover:bg-blue-100 rounded-lg transition-colors cursor-pointer shadow-sm" title="Editar producto">
           <Edit2 className="w-3 h-3 md:w-4 md:h-4" />
         </button>
-        <button onClick={() => deleteProduct(product._id)} className="p-1.5 md:p-2 text-gray-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg transition-colors cursor-pointer shadow-sm" title="Eliminar producto">
-          <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
-        </button>
+        {!confirmDelete ? (
+          <button onClick={() => setConfirmDelete(true)} className="p-1.5 md:p-2 text-gray-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg transition-colors cursor-pointer shadow-sm" title="Eliminar producto">
+            <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
+          </button>
+        ) : (
+          <div className="flex flex-col gap-1">
+            <button onClick={() => deleteProduct(product._id)} className="p-1.5 md:p-2 text-white bg-red-500 rounded-lg transition-colors cursor-pointer shadow-sm" title="Confirmar eliminación">
+              <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
+            </button>
+            <button onClick={() => setConfirmDelete(false)} className="p-1.5 md:p-2 text-gray-500 bg-white rounded-lg transition-colors cursor-pointer shadow-sm" title="Cancelar">
+              X
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import { OrdersPanel } from '@/features/admin/orders/components/OrdersPanel';
 import { CouponsPanel } from '@/features/admin/cupones/components/CouponsPanel';
 import { ProductsPanel } from '@/features/admin/products/components/ProductsPanel';
 import { CategoriesPanel } from '@/features/admin/products/components/CategoriesPanel';
+import { StoreSettingsPanel } from '@/features/admin/config/components/StoreSettingsPanel';
 export default function AdminDashboard() {
   return (
     // 2. Envolvemos todo el Dashboard adentro del Guardián
@@ -30,6 +31,7 @@ export default function AdminDashboard() {
           {/* FILA 3: Productos */}
           <CategoriesPanel />
           <ProductsPanel />
+          <StoreSettingsPanel />
         </main>
 
         {/* ESTILOS PARA EL SCROLLBAR DEL PANEL (Vienen del diseño original) */}

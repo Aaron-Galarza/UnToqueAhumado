@@ -31,11 +31,11 @@ export function ProductsPanel() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
               <label className="text-[10px] md:text-xs text-gray-500 mb-1 block">Nombre del producto</label>
-              <input type="text" value={newProduct.title} onChange={(e) => updateNewProduct({ title: e.target.value })} placeholder="Ej: Triple Bacon" className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-primary" />
+              <input type="text" maxLength={60} value={newProduct.title} onChange={(e) => updateNewProduct({ title: e.target.value })} placeholder="Ej: Triple Bacon" className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-primary" />
             </div>
             <div className="sm:col-span-2">
               <label className="text-[10px] md:text-xs text-gray-500 mb-1 block">Descripción</label>
-              <textarea rows={2} value={newProduct.description} onChange={(e) => updateNewProduct({ description: e.target.value })} placeholder="Ingredientes..." className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-primary resize-none" />
+              <textarea rows={2} maxLength={200} value={newProduct.description} onChange={(e) => updateNewProduct({ description: e.target.value })} placeholder="Ingredientes..." className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-primary resize-none" />
             </div>
             <div className="sm:col-span-2">
               <label className="text-[10px] md:text-xs text-gray-500 mb-1 block">Categoría</label>
@@ -44,15 +44,27 @@ export function ProductsPanel() {
                 {categories.map(cat => <option key={cat._id} value={cat.name}>{cat.name}</option>)}
               </select>
             </div>
-            <div>
+           <div>
               <label className="text-[10px] md:text-xs text-gray-500 mb-1 block">Precio ($)</label>
-              <input type="number" value={newProduct.price} onChange={(e) => updateNewProduct({ price: e.target.value })} placeholder="0.00" className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-primary" />
+              <input 
+                type="number" 
+                max={999999} 
+                value={newProduct.price} 
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === '' || Number(val) <= 999999) {
+                    updateNewProduct({ price: val });
+                  }
+                }} 
+                placeholder="0.00" 
+                className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-primary" 
+              />
             </div>
             <div>
               <label className="text-[10px] md:text-xs text-gray-500 mb-1 block">URL de Imagen</label>
               <div className="flex items-center gap-2 w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 focus-within:border-primary">
                 <ImageIcon className="w-4 h-4 text-gray-400 shrink-0" />
-                <input type="text" value={newProduct.image} onChange={(e) => updateNewProduct({ image: e.target.value })} placeholder="https://..." className="flex-1 bg-transparent text-sm text-gray-900 focus:outline-none min-w-0" />
+                <input type="text" maxLength={200} value={newProduct.image} onChange={(e) => updateNewProduct({ image: e.target.value })} placeholder="https://..." className="flex-1 bg-transparent text-sm text-gray-900 focus:outline-none min-w-0" />
               </div>
             </div>
           </div>

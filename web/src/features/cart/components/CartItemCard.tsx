@@ -13,7 +13,7 @@ interface CartItemCardProps {
 }
 
 export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onUpdateAdicional }: CartItemCardProps) {
-  const addons = useAddons(); 
+  const { addons, isLoading: addonsLoading } = useAddons(); 
 
   const extrasTotal = addons.reduce((acc, extra) => {
     return acc + (item.adicionales?.[extra._id] || 0) * extra.price;
@@ -67,7 +67,7 @@ export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onUpdateAdi
               </div>
             );
           })}
-          {addons.length === 0 && (
+          {addonsLoading && (
             <p className="text-xs text-muted-foreground text-center">Buscando adicionales...</p>
           )}
         </div>
