@@ -64,11 +64,16 @@ export function OrderCard({ order, updateOrderStatus }: OrderCardProps) {
           </div>
         </div>
 
-        {/* Hora arrinconada arriba a la derecha */}
+        {/* Hora y Fecha arrinconada arriba a la derecha */}
         <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-md border border-gray-100">
           <Clock className="w-3 h-3 text-gray-400" />
-          <span className="text-[10px] md:text-xs font-bold text-gray-500">
-            {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          <span className="text-[10px] md:text-xs font-bold text-gray-500 whitespace-nowrap">
+            {new Date(order.createdAt).toLocaleString('es-AR', { 
+              day: '2-digit', 
+              month: '2-digit', 
+              hour: '2-digit', 
+              minute: '2-digit' 
+            })}
           </span>
         </div>
       </div>
