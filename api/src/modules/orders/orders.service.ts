@@ -3,7 +3,7 @@ import * as CouponService from '../coupons/coupons.services'
 import * as ProductService from '../productos/products.service'
 import * as AdicionalService from '../adicionales/adicionales.service'
 import { updateAnalyticsOnDelivery, revertAnalyticsOnDelivery } from '../analytics/analytics.service'
-import { startOfWeek, startOfMonth, format } from 'date-fns';
+import { startOfWeek, startOfMonth, format, subDays } from 'date-fns';
 
 export const createOrder = async (orderData: any): Promise<iOrder> => {
 
@@ -76,28 +76,33 @@ export const getAllOrders = async (): Promise<iOrder[]> => {
   return await OrderModel.find().sort({ createdAt: -1 })
 }
 
-export const getOrdersRange = async (range: 'hoy' | 'semana' | 'mes'): Promise<iOrder[] | null> => {
+export const getOrdersRange = async (range: 'hoy' | 'ayer' | 'semana' | 'mes'): Promise<iOrder[] | null> => {
 
-    const now = new Date();
+  const now = new Date();
 
-   // Determinar rango de fechas
-    let startDate: Date;
-  
-    if (range === 'hoy') {
-      startDate = new Date(format(now, 'yyyy-MM-dd') + 'T00:00:00.000Z');
-    } else if (range === 'semana') {
-      startDate = startOfWeek(now, { weekStartsOn: 1 });
-    } else {
-      startDate = startOfMonth(now);
-    }
-  
-    // Traer los dailies del rango (1 doc para hoy, ~7 para semana, ~31 para mes)
-    const orders = await OrderModel.find({
-      createdAt: { $gte: startDate },
-    }).lean().sort({ createdAt: -1 });
+  let startDate: Date;
+  let endDate: Date | null = null;
 
+  if (range === 'hoy') {
+    startDate = new Date(format(now, 'yyyy-MM-dd') + 'T00:00:00.000Z');
+  } else if (range === 'ayer') {
+    const yesterday = subDays(now, 1);
+    startDate = new Date(format(yesterday, 'yyyy-MM-dd') + 'T00:00:00.000Z');
+    endDate   = new Date(format(now, 'yyyy-MM-dd') + 'T00:00:00.000Z');
+  } else if (range === 'semana') {
+    startDate = startOfWeek(now, { weekStartsOn: 1 });
+  } else {
+    startDate = startOfMonth(now);
+  }
 
-  return orders 
+  const dateFilter: any = { $gte: startDate };
+  if (endDate) dateFilter.$lt = endDate;
+
+  const orders = await OrderModel.find({
+    createdAt: dateFilter,
+  }).lean().sort({ createdAt: -1 });
+
+  return orders;
 }
 
 export const update = async (

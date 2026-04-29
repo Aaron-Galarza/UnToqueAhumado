@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import * as AnalyticsService from './analytics.service';
 
-const VALID_RANGES = ['hoy', 'semana', 'mes'] as const;
+const VALID_RANGES = ['hoy', 'ayer', 'semana', 'mes'] as const;
 type Range = (typeof VALID_RANGES)[number];
 
 export const getAnalyticsReport = async (req: Request, res: Response) => {
@@ -11,7 +11,7 @@ export const getAnalyticsReport = async (req: Request, res: Response) => {
     if (!VALID_RANGES.includes(range as Range)) {
       return res.status(400).json({
         success: false,
-        message: "Rango no válido. Usa 'hoy', 'semana' o 'mes'.",
+        message: "Rango no válido. Usa 'hoy', 'ayer', 'semana' o 'mes'.",
       });
     }
 

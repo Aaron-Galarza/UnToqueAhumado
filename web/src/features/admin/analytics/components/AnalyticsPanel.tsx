@@ -24,6 +24,7 @@ export function AnalyticsPanel() {
             className="w-full sm:w-auto bg-white border border-[#FFE8D9] text-gray-900 text-sm rounded-lg px-4 py-2 outline-none focus:border-primary cursor-pointer disabled:opacity-50"
           >
             <option value="hoy">Hoy</option>
+            <option value="ayer">Ayer</option>
             <option value="semana">Esta Semana</option>
             <option value="mes">Este Mes</option>
           </select>

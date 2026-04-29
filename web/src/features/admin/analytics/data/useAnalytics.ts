@@ -13,7 +13,7 @@ export interface AnalyticsData {
   } | null;
 }
 
-export type AnalyticsRange = 'hoy' | 'semana' | 'mes';
+export type AnalyticsRange = 'hoy' | 'ayer' |'semana' | 'mes';
 
 export function useAnalytics() {
   const [range, setRange] = useState<AnalyticsRange>('hoy');

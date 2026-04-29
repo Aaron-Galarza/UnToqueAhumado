@@ -59,6 +59,7 @@ export function OrdersPanel() {
             className="text-xs font-bold border border-gray-200 rounded-md bg-gray-50 text-gray-600 cursor-pointer outline-none focus:border-primary py-1.5 px-2 w-28 transition-colors"
           >
             <option value="hoy">Hoy</option>
+            <option value="ayer">Ayer</option>
             <option value="semana">Semana</option>
             <option value="mes">Mes</option>
           </select>

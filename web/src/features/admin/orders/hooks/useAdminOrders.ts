@@ -6,7 +6,7 @@ import { getSocket, disconnectSocket } from '@/lib/socket.';
 import toast from 'react-hot-toast';
 
 // 1. Definimos los rangos permitidos
-export type DateRange = 'hoy' | 'semana' | 'mes';
+export type DateRange = 'hoy' | 'ayer' |'semana' | 'mes';
 
 export interface OrderItem {
   productId?: string;

@@ -1,6 +1,6 @@
 import { DailyAnalyticsModel } from './daily.model';
 import { iOrder } from '../orders/orders.model';
-import { startOfWeek, startOfMonth, format } from 'date-fns';
+import { startOfWeek, startOfMonth, format, subDays } from 'date-fns';
 
 // ─── Tipos ───────────────────────────────────────────────
 
@@ -15,25 +15,28 @@ interface AnalyticsStats {
 // ─── Consulta principal ──────────────────────────────────
 
 export const getAnalytics = async (
-  range: 'hoy' | 'semana' | 'mes'
+  range: 'hoy' | 'ayer' | 'semana' | 'mes'
 ): Promise<AnalyticsStats> => {
   const now = new Date();
   const todayStr = format(now, 'yyyy-MM-dd');
 
-  // Determinar rango de fechas
   let startDate: string;
+  let endDate: string = todayStr;
 
   if (range === 'hoy') {
     startDate = todayStr;
+  } else if (range === 'ayer') {
+    const yesterdayStr = format(subDays(now, 1), 'yyyy-MM-dd');
+    startDate = yesterdayStr;
+    endDate   = yesterdayStr;
   } else if (range === 'semana') {
     startDate = format(startOfWeek(now, { weekStartsOn: 1 }), 'yyyy-MM-dd');
   } else {
     startDate = format(startOfMonth(now), 'yyyy-MM-dd');
   }
 
-  // Traer los dailies del rango (1 doc para hoy, ~7 para semana, ~31 para mes)
   const dailies = await DailyAnalyticsModel.find({
-    date: { $gte: startDate, $lte: todayStr },
+    date: { $gte: startDate, $lte: endDate },
   }).lean();
 
   if (dailies.length === 0) {

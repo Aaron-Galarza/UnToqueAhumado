@@ -4,7 +4,7 @@ import { sendError, sendSucces } from '../../utils/response'
 import { validOrderStatus, OrderStatus, validPaymentMethods, PaymentMethod } from './orders.model'
 import { getIO } from '../../socket/socket'
 
-const VALID_RANGES = ['hoy', 'semana', 'mes'] as const;
+const VALID_RANGES = ['hoy', 'ayer', 'semana', 'mes'] as const;
 type Range = (typeof VALID_RANGES)[number];
 
 export const createOrder = async (req: Request, res: Response) => {
