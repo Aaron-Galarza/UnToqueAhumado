@@ -25,6 +25,12 @@ export interface Order {
   createdAt: string;
 }
 
+export interface Addon {
+  title: string;
+  quantity: number;
+  price: number;
+}
+
 export function useAdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);

@@ -1,5 +1,5 @@
 import { Clock, MessageCircle, Banknote, CreditCard, MapPin, Store, Ticket } from 'lucide-react';
-import { Order } from '../hooks/useAdminOrders';
+import { Order, Addon } from '../hooks/useAdminOrders';
 
 const STATUS_COLORS = {
   'pending': 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20',
@@ -87,7 +87,7 @@ export function OrderCard({ order, updateOrderStatus }: OrderCardProps) {
               {/* Adicionales */}
               {item.addons && item.addons.length > 0 && (
                 <div className="pl-5 mt-0.5 space-y-0.5">
-                  {item.addons.map((addon, aIdx) => (
+                  {(item.addons as Addon[])?.map((addon: Addon, aIdx: number) => (
                     <div key={aIdx} className="text-gray-600 font-bold text-[11px] md:text-xs flex items-center gap-1">
                       <span className="text-orange-400">+</span>
                       <span>{addon.quantity}x {addon.title || 'Adicional'}</span>
