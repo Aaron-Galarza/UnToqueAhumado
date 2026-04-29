@@ -2,7 +2,7 @@ import { iOrder, iCartItem, iCartAddon, OrderModel, OrderStatus } from './orders
 import * as CouponService from '../coupons/coupons.services'
 import * as ProductService from '../productos/products.service'
 import * as AdicionalService from '../adicionales/adicionales.service'
-import { updateAnalyticsDaily } from '../analytics/analytics.service'
+import { updateAnalyticsOnDelivery, revertAnalyticsOnDelivery } from '../analytics/analytics.service'
 
 export const createOrder = async (orderData: any): Promise<iOrder> => {
 
@@ -75,32 +75,34 @@ export const getAllOrders = async (): Promise<iOrder[]> => {
   return await OrderModel.find().sort({ createdAt: -1 })
 }
 
-export const update = async (id: string, newStatus: OrderStatus): Promise<iOrder | null> => {
-
-  const oldOrder = await OrderModel.findById(id)
-  if (!oldOrder) return null
-  const oldStatus = oldOrder.status
-
+export const update = async (
+  id: string,
+  newStatus: OrderStatus
+): Promise<iOrder | null> => {
+  const oldOrder = await OrderModel.findById(id);
+  if (!oldOrder) return null;
+ 
+  const oldStatus = oldOrder.status;
+ 
   const updatedOrder = await OrderModel.findByIdAndUpdate(
     id,
     { status: newStatus },
     { returnDocument: 'after' }
-  )
-  if (updatedOrder) {
-    console.log(`[PEDIDO] Pedido ${updatedOrder._id} actualizado a "${newStatus}"`)
+  );
+ 
+  if (!updatedOrder) return null;
+ 
+  console.log(`[PEDIDO] Pedido ${updatedOrder._id} actualizado a "${newStatus}"`);
+ 
+  // Pedido se entrega ahora → sumar a analytics
+  if (oldStatus !== 'delivered' && newStatus === 'delivered') {
+    await updateAnalyticsOnDelivery(updatedOrder);
   }
-
-  if (updatedOrder) {
-    // 1. Caso: El pedido se entrega ahora
-    if (oldStatus !== 'delivered' && newStatus === 'delivered') {
-      await updateAnalyticsDaily(updatedOrder);
-    }
-    
-    // 2. Caso: El pedido ya estaba entregado pero se canceló o se volvió atrás
-    if (oldStatus === 'delivered' && newStatus !== 'delivered') {
-      await updateAnalyticsDaily(updatedOrder, true); // true = revertir
-    }
+ 
+  // Pedido estaba entregado y se revierte → restar de analytics (con protección)
+  if (oldStatus === 'delivered' && newStatus !== 'delivered') {
+    await revertAnalyticsOnDelivery(updatedOrder);
   }
-
-  return updatedOrder
-}
+ 
+  return updatedOrder;
+};
