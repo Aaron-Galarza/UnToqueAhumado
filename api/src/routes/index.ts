@@ -6,6 +6,7 @@ import userRouters from '../modules/users/user.routers'
 import adicionalRoutes from '../modules/adicionales/adicionales.routes'
 import categoriaRoutes from '../modules/categorias/categorias.routes'
 import configRoutes from '../modules/Schedules/Schedule.routes'
+import analyticsRoutes from '../modules/analytics/analytics.routes'
 
 const router = Router();
 
@@ -16,6 +17,7 @@ router.use('/user', userRouters)
 router.use('/adicionales', adicionalRoutes)
 router.use('/categorias', categoriaRoutes)
 router.use('/configuracion', configRoutes)
+router.use('/analiticas', analyticsRoutes)
 
 router.get('/health', (req, res) => {
   res.json({ status: 'API is running', timestamp: new Date() });

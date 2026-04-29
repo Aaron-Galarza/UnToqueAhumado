@@ -33,6 +33,7 @@ export interface iOrder extends Document {
   paymentMethod: PaymentMethod
   total: number
   status: OrderStatus
+  createdAt: Date
 }
 
 // Subdocumento para cada adicional dentro de un item

@@ -2,6 +2,7 @@ import { iOrder, iCartItem, iCartAddon, OrderModel, OrderStatus } from './orders
 import * as CouponService from '../coupons/coupons.services'
 import * as ProductService from '../productos/products.service'
 import * as AdicionalService from '../adicionales/adicionales.service'
+import { updateAnalyticsDaily } from '../analytics/analytics.service'
 
 export const createOrder = async (orderData: any): Promise<iOrder> => {
 
@@ -75,15 +76,31 @@ export const getAllOrders = async (): Promise<iOrder[]> => {
 }
 
 export const update = async (id: string, newStatus: OrderStatus): Promise<iOrder | null> => {
-  const order = await OrderModel.findByIdAndUpdate(
+
+  const oldOrder = await OrderModel.findById(id)
+  if (!oldOrder) return null
+  const oldStatus = oldOrder.status
+
+  const updatedOrder = await OrderModel.findByIdAndUpdate(
     id,
     { status: newStatus },
-    { new: true }
+    { returnDocument: 'after' }
   )
-
-  if (order) {
-    console.log(`[PEDIDO] Pedido ${order._id} actualizado a "${newStatus}"`)
+  if (updatedOrder) {
+    console.log(`[PEDIDO] Pedido ${updatedOrder._id} actualizado a "${newStatus}"`)
   }
 
-  return order
+  if (updatedOrder) {
+    // 1. Caso: El pedido se entrega ahora
+    if (oldStatus !== 'delivered' && newStatus === 'delivered') {
+      await updateAnalyticsDaily(updatedOrder);
+    }
+    
+    // 2. Caso: El pedido ya estaba entregado pero se canceló o se volvió atrás
+    if (oldStatus === 'delivered' && newStatus !== 'delivered') {
+      await updateAnalyticsDaily(updatedOrder, true); // true = revertir
+    }
+  }
+
+  return updatedOrder
 }
