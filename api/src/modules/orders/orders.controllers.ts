@@ -4,6 +4,9 @@ import { sendError, sendSucces } from '../../utils/response'
 import { validOrderStatus, OrderStatus, validPaymentMethods, PaymentMethod } from './orders.model'
 import { getIO } from '../../socket/socket'
 
+const VALID_RANGES = ['hoy', 'semana', 'mes'] as const;
+type Range = (typeof VALID_RANGES)[number];
+
 export const createOrder = async (req: Request, res: Response) => {
   try {
     const { customer, items, deliveryType, paymentMethod } = req.body
@@ -55,13 +58,25 @@ export const createOrder = async (req: Request, res: Response) => {
   }
 }
 
-export const getOrders = async (req: Request, res: Response) => {
+export const getAllOrders = async (req: Request, res: Response) => {
   try {
     const orders = await OrderService.getAllOrders()
     return sendSucces(res, orders, 200)
   } catch (error: any) {
     console.error(`[ERROR] getOrders - ${error?.message}`)
     return sendError(res, 'Error al obtener pedidos', 500)
+  }
+}
+
+export const getOrdersRange = async (req: Request, res: Response) => {
+  try {
+    
+    const rango = (req.query.range as string) || 'hoy';
+    const orders = await OrderService.getOrdersRange(rango as Range)
+
+    return sendSucces(res, orders, 200)
+  } catch (error) {
+    return sendError(res, 'Error al obtener pedidos en rango' )
   }
 }
 
