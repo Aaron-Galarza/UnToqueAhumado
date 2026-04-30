@@ -67,4 +67,7 @@ const OrderSchema = new Schema<iOrder>({
   status:       { type: String, enum: validOrderStatus, default: 'pending' }
 }, { timestamps: true })
 
+OrderSchema.index({ createdAt: -1 })
+OrderSchema.index({ status: 1 })
+
 export const OrderModel = mongoose.model<iOrder>('Order', OrderSchema)

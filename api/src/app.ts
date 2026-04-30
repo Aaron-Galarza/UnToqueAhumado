@@ -1,5 +1,6 @@
 import express, { Application } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import mainRouter from './routes/index'
 import { requestLogger } from './middlewares/logger.middleware';
 import { errorHandler } from './middlewares/error.middleware';
@@ -11,6 +12,7 @@ const allowedOrigins = [
     'http://localhost:3000'
 ]
 
+app.use(helmet())
 app.use(cors({
     origin: function (origin, callback) {
     if (!origin) return callback(null, true);

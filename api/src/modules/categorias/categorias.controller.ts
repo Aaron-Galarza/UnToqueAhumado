@@ -22,15 +22,10 @@ export const getActiveCategorias = async (req: Request, res: Response) => {
 
 export const createCategoria = async (req: Request, res: Response) => {
   try {
-    const { name } = req.body
-
-    if (!name) return sendError(res, 'El nombre de la categoría es obligatorio')
-
     const categoria = await CategoriaService.create(req.body)
     return sendSucces(res, categoria, 201)
   } catch (error: any) {
-    // Mongoose lanza 11000 cuando el nombre ya existe (unique)
-    if (error?.code === 11000) return sendError(res, 'Ya existe una categoría con ese nombre')
+    if (error?.code === 11000) return sendError(res, 'Ya existe una categoría con ese nombre', 409)
     return sendError(res, 'Error al crear la categoría', 500)
   }
 }
@@ -39,12 +34,10 @@ export const updateCategoria = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
     const categoria = await CategoriaService.modify(id as string, req.body)
-
     if (!categoria) return sendError(res, 'Categoría no encontrada', 404)
-
     return sendSucces(res, categoria)
   } catch (error: any) {
-    if (error?.code === 11000) return sendError(res, 'Ya existe una categoría con ese nombre')
+    if (error?.code === 11000) return sendError(res, 'Ya existe una categoría con ese nombre', 409)
     return sendError(res, 'Error al actualizar la categoría', 500)
   }
 }
@@ -53,9 +46,7 @@ export const toggleActiveCategoria = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
     const categoria = await CategoriaService.toggleActive(id as string)
-
     if (!categoria) return sendError(res, 'Categoría no encontrada', 404)
-
     return sendSucces(res, categoria)
   } catch (error) {
     return sendError(res, 'Error al activar / desactivar categoría', 500)
@@ -66,9 +57,7 @@ export const deleteCategoria = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
     const result = await CategoriaService.deleteById(id as string)
-
     if (!result) return sendError(res, 'Categoría no encontrada', 404)
-
     return sendSucces(res, result)
   } catch (error) {
     return sendError(res, 'Error al eliminar la categoría', 500)
