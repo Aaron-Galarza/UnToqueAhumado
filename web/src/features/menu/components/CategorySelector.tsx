@@ -67,7 +67,7 @@ export function CategorySelector({ categories, isLoading, activeCategory, onSele
   
   if (isLoading) {
     return (
-      <div className="flex w-full overflow-x-auto gap-3 pt-1 pb-4 px-4 justify-center opacity-50 animate-pulse">
+      <div className="flex w-full overflow-x-auto gap-5 pt-1 pb-4 px-4 justify-center opacity-50 animate-pulse">
         <div className="w-20 md:w-24 h-24 bg-card rounded-2xl border border-border"></div>
         <div className="w-20 md:w-24 h-24 bg-card rounded-2xl border border-border"></div>
         <div className="w-20 md:w-24 h-24 bg-card rounded-2xl border border-border"></div>
@@ -78,7 +78,7 @@ export function CategorySelector({ categories, isLoading, activeCategory, onSele
   if (categories.length === 0) return null;
 
   return (
-    <div className="flex w-full overflow-x-auto scrollbar-hide gap-3 md:gap-6 snap-x pt-1 pb-4 px-4 justify-center">
+    <div className="flex w-full overflow-x-auto scrollbar-hide gap-4 md:gap-7 snap-x pt-1 pb-4 px-4 justify-center">
       {categories.map((c) => {
         const IconComponent = getCategoryIcon(c.name);
         
@@ -96,7 +96,7 @@ export function CategorySelector({ categories, isLoading, activeCategory, onSele
               <IconComponent className="w-7 h-7 md:w-8 md:h-8" />
             </div>
             
-            <span className="text-[10px] md:text-xs font-bold text-center leading-[1.1]">
+          <span className="text-[9px] md:text-xs font-bold text-center leading-[1.1] tracking-wide px-1">
               {c.name}
             </span>
           </button>

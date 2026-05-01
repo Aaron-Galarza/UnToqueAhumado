@@ -7,9 +7,10 @@ import { canHaveExtras } from '@/features/cart/data/cartRules';
 
 interface CartItemCardProps {
   item: CartItemWithExtras;
-  onUpdateQuantity: (productId: string, delta: number) => void;
-  onRemoveItem: (productId: string) => void;
-  onUpdateAdicional: (productId: string, adId: string, delta: number) => void;
+  // Actualizamos las firmas para que entiendan que reciben un ID (ya sea productId o cartItemId)
+  onUpdateQuantity: (id: string, delta: number) => void;
+  onRemoveItem: (id: string) => void;
+  onUpdateAdicional: (id: string, adId: string, delta: number) => void;
 }
 
 export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onUpdateAdicional }: CartItemCardProps) {
@@ -20,6 +21,9 @@ export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onUpdateAdi
   }, 0);
 
   const itemTotal = (item.price + extrasTotal) * item.quantity;
+
+  // Creamos una constante para saber qué ID pasarle a las funciones
+  const uniqueId = item.cartItemId || item.productId;
 
   return (
     <div className="bg-card border border-border p-4 rounded-2xl flex flex-col gap-3 shadow-sm relative">
@@ -37,7 +41,6 @@ export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onUpdateAdi
         </div>
       </div>
 
-      {/* MAGIA: Solo renderiza este bloque si la categoría es correcta */}
       {canHaveExtras(item.category) && (
         <div className="bg-secondary/50 rounded-xl p-3 flex flex-col gap-3">
           {addons.map(extra => {
@@ -49,7 +52,8 @@ export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onUpdateAdi
                 </span>
                 <div className="flex items-center gap-3 bg-background border border-border rounded-lg p-0.5">
                   <button 
-                    onClick={() => onUpdateAdicional(item.productId, extra._id, -1)}
+                    // PASAMOS EL UNIQUE ID ACÁ
+                    onClick={() => onUpdateAdicional(uniqueId, extra._id, -1)}
                     disabled={qty === 0}
                     className="w-6 h-6 flex items-center justify-center text-foreground hover:bg-secondary rounded-md disabled:opacity-30 transition-colors cursor-pointer"
                   >
@@ -57,7 +61,8 @@ export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onUpdateAdi
                   </button>
                   <span className="text-xs font-bold w-3 text-center">{qty}</span>
                   <button 
-                    onClick={() => onUpdateAdicional(item.productId, extra._id, 1)}
+                    // Y ACÁ
+                    onClick={() => onUpdateAdicional(uniqueId, extra._id, 1)}
                     disabled={qty >= 10}
                     className="w-6 h-6 flex items-center justify-center text-foreground hover:bg-secondary rounded-md transition-colors cursor-pointer"
                   >
@@ -76,7 +81,8 @@ export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onUpdateAdi
       <div className="flex items-center justify-between mt-1">
         <div className="flex items-center gap-4 bg-secondary border border-border rounded-xl p-1">
           <button 
-            onClick={() => onUpdateQuantity(item.productId, -1)}
+            // Y ACÁ
+            onClick={() => onUpdateQuantity(uniqueId, -1)}
             disabled={item.quantity <= 1}
             className="w-8 h-8 flex items-center justify-center bg-background rounded-lg shadow-sm text-foreground hover:text-primary transition-colors disabled:opacity-50 cursor-pointer"
           >
@@ -84,7 +90,8 @@ export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onUpdateAdi
           </button>
           <span className="font-extrabold text-sm w-4 text-center">{item.quantity}</span>
           <button 
-            onClick={() => onUpdateQuantity(item.productId, 1)}
+            // Y ACÁ
+            onClick={() => onUpdateQuantity(uniqueId, 1)}
             disabled={item.quantity >= 10}
             className="w-8 h-8 flex items-center justify-center bg-background rounded-lg shadow-sm text-foreground hover:text-primary transition-colors disabled:opacity-50 cursor-pointer"
           >
@@ -95,7 +102,8 @@ export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onUpdateAdi
         <div className="flex items-center gap-3">
           <span className="font-black text-lg">${itemTotal}</span>
           <button 
-            onClick={() => onRemoveItem(item.productId)}
+            // ¡Y ACÁ!
+            onClick={() => onRemoveItem(uniqueId)}
             className="w-10 h-10 flex items-center justify-center bg-red-50 text-red-500 rounded-xl hover:bg-red-100 hover:scale-105 transition-all cursor-pointer"
           >
             <Trash2 className="w-4 h-4" />
