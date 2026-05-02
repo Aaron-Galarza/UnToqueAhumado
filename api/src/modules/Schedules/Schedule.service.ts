@@ -23,18 +23,12 @@ export const checkStoreStatus = async () => {
     const minute = parts.find(p => p.type === 'minute')?.value;
     const currentTime = `${hour}:${minute}`;
 
-    // 👇 LOGS TEMPORALES - sacalos una vez que confirmes que funciona
-    console.log('UTC now:', now.toISOString())
-    console.log('Día calculado:', dayName)
-    console.log('Hora calculada:', currentTime)
-    console.log('Schedules en DB:', config.dailySchedule.map(s => s.day))
 
     const todaySchedule = config.dailySchedule.find(s => 
         s.day.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 
         dayName?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     );
 
-    console.log('Schedule encontrado:', todaySchedule ?? 'NINGUNO')
 
     if (!todaySchedule || !todaySchedule.isStoreOpen) {
         return { isClose: true, message: "Hoy el local permanece cerrado" };
@@ -42,7 +36,6 @@ export const checkStoreStatus = async () => {
 
     const isOpen = currentTime >= todaySchedule.openTime && currentTime <= todaySchedule.closeTime;
 
-    console.log(`Comparación: "${currentTime}" >= "${todaySchedule.openTime}" && <= "${todaySchedule.closeTime}" → ${isOpen}`)
 
     return {
         isOpen,

@@ -4,11 +4,17 @@ import * as ProductService from '../productos/products.service'
 import * as AdicionalService from '../adicionales/adicionales.service'
 import { updateAnalyticsOnDelivery, revertAnalyticsOnDelivery } from '../analytics/analytics.service'
 import { startOfWeek, startOfMonth, format, subDays } from 'date-fns';
+import { checkStoreStatus } from '../Schedules/Schedule.service'
 
 export const createOrder = async (orderData: any): Promise<iOrder> => {
 
   const items: iCartItem[] = await Promise.all(
     orderData.items.map(async (item: any) => {
+
+      const storeStatus = await checkStoreStatus()
+      if (storeStatus.isClose || !storeStatus.isOpen) {
+        throw new Error(storeStatus.message || 'El negocio está cerrado en este momento')
+      }
 
       // Snapshot del producto: precio real del catálogo
       const product = await ProductService.viewById(item.productId)
