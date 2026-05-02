@@ -1,19 +1,18 @@
-import { iProducto, ProductModel } from './products.model'; // Importación limpia
-// const products: Product[] = db.products as Product[];
+import { iProducto, ProductModel } from './products.model'; 
 
 // Servicio para obtener todos los productos (admin)
 export const viewAll = async (): Promise<iProducto[]> => {
-  return await ProductModel.find();
+  return await ProductModel.find().populate('category', 'name active')
 };
 
 // Servicio para obtener todos los productos ACTIVOS (publico)
 export const viewActive = async (): Promise<iProducto[]> => {
- return await ProductModel.find({ active: true })
+  return await ProductModel.find({ active: true }).populate('category', 'name active')
 }
 
 // Servicio para obtener un producto por ID
 export const viewById = async (id: string): Promise<iProducto | null> => {
-  return await ProductModel.findById(id)
+  return await ProductModel.findById(id).populate('category', 'name active')
 }
 
 // Servicio para crear un nuevo producto (ADMIN)
@@ -26,10 +25,8 @@ export const create = async (data: Partial<iProducto>): Promise<iProducto> => {
 export const modify = async (id: string, data: Partial<iProducto>): Promise<iProducto | null> => {
   return await ProductModel.findByIdAndUpdate(id,
     { $set: data },
-    { new: true,
-      runValidators: true
-     }
-  )
+    { new: true, runValidators: true }
+  ).populate('category', 'name active')
 }
 
 // Servicio para Activar/Desactivar un Producto

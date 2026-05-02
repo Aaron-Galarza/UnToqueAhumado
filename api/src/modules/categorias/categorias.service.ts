@@ -9,8 +9,8 @@ export const viewActive = async (): Promise<iCategoria[]> => {
 }
 
 // Usada por products.controller para validar que la categoría existe y está activa
-export const findByName = async (name: string): Promise<iCategoria | null> => {
-  return await CategoriaModel.findOne({ name, active: true })
+export const findById = async (id: string): Promise<iCategoria | null> => {
+  return await CategoriaModel.findById(id)
 }
 
 export const create = async (data: Partial<iCategoria>): Promise<iCategoria> => {

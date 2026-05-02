@@ -25,8 +25,9 @@ export const createNewProduct = async (req: Request, res: Response) => {
   try {
     const { category } = req.body
 
-    const categoriaValida = await CategoriaService.findByName(category)
-    if (!categoriaValida) return sendError(res, `La categoría "${category}" no existe o está inactiva`)
+    const categoriaValida = await CategoriaService.findById(category)
+    if (!categoriaValida) return sendError(res, 'Categoría no encontrada', 404)
+    if (!categoriaValida.active) return sendError(res, 'La categoría está inactiva', 400)
 
     const newProduct = await ProductService.create(req.body)
     return sendSucces(res, newProduct, 201)
@@ -40,11 +41,12 @@ export const updateProduct = async (req: Request, res: Response) => {
     const { id } = req.params
 
     if (req.body.category) {
-      const categoriaValida = await CategoriaService.findByName(req.body.category)
-      if (!categoriaValida) return sendError(res, `La categoría "${req.body.category}" no existe o está inactiva`)
+      const categoriaValida = await CategoriaService.findById(req.body.category)
+      if (!categoriaValida) return sendError(res, 'Categoría no encontrada', 404)
+      if (!categoriaValida.active) return sendError(res, 'La categoría está inactiva', 400)
     }
 
-    const update = await ProductService.modify(id as string, req.body)
+    const update = await ProductService.modify(id, req.body)
     if (!update) return sendError(res, 'Producto no encontrado', 404)
 
     return sendSucces(res, update, 200)
@@ -56,7 +58,7 @@ export const updateProduct = async (req: Request, res: Response) => {
 export const activeStatusProduct = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
-    const product = await ProductService.toggleActive(id as string)
+    const product = await ProductService.toggleActive(id)
     if (!product) return sendError(res, 'Producto no encontrado', 404)
     return sendSucces(res, product, 200)
   } catch (error) {
@@ -67,7 +69,7 @@ export const activeStatusProduct = async (req: Request, res: Response) => {
 export const deleteProduct = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
-    const result = await ProductService.deleteById(id as string)
+    const result = await ProductService.deleteById(id)
     if (!result) return sendError(res, 'Producto no encontrado', 404)
     return sendSucces(res, result)
   } catch (error) {

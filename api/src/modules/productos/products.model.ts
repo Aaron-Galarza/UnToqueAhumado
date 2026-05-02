@@ -5,7 +5,7 @@ export interface iProducto extends Document {
     price: number
     description?: string
     image?: string
-    category: string
+    category: mongoose.Types.ObjectId
     active: boolean
 
 }
@@ -26,7 +26,8 @@ const ProductoSchema = new Schema<iProducto>({
         type: String
     },
     category: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Categoria',
         required: [true, 'La categoria es obligatoria'],
         index: true
     },
