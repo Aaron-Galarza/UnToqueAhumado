@@ -1,16 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
+import { Product } from '@/types';
 import toast from 'react-hot-toast';
-
-export interface Product {
-  _id: string;
-  title: string;
-  price: number;
-  description: string;
-  image: string;
-  category: string;
-  active: boolean;
-}
 
 export interface Category {
   _id: string;
@@ -39,7 +30,7 @@ export function useProductsLogic() {
     if (response.success && response.data && response.data.length > 0) {
       const fetchedCategories = response.data;
       setCategories(fetchedCategories);
-      setNewProduct((prev) => ({ ...prev, category: fetchedCategories[0].name }));
+      setNewProduct((prev) => ({ ...prev, category: fetchedCategories[0]._id }));
     }
   };
 
@@ -54,7 +45,9 @@ export function useProductsLogic() {
       return;
     }
     const payload = { ...newProduct, price: Number(newProduct.price) };
-    const response = editingId ? await api.put(`/api/productos/admin/${editingId}`, payload) : await api.post('/api/productos/admin', payload);
+    const response = editingId
+      ? await api.put(`/api/productos/admin/${editingId}`, payload)
+      : await api.post('/api/productos/admin', payload);
     if (response.success) {
       fetchProducts();
       cancelEdit();
@@ -64,10 +57,8 @@ export function useProductsLogic() {
 
   const deleteProduct = async (id: string) => {
     const response = await api.delete(`/api/productos/admin/${id}`);
-    if (response.success) {
-      fetchProducts();
-      toast.success('Producto eliminado.');
-    } else toast.error(`Error al eliminar: ${response.error || 'No se pudo eliminar el producto.'}`);
+    if (response.success) { fetchProducts(); toast.success('Producto eliminado.'); }
+    else toast.error(`Error al eliminar: ${response.error}`);
   };
 
   const toggleProductActive = async (id: string) => {
@@ -77,15 +68,24 @@ export function useProductsLogic() {
 
   const handleEditClick = (product: Product) => {
     setEditingId(product._id);
-    setNewProduct({ title: product.title || '', price: String(product.price || ''), description: product.description || '', image: product.image || '', category: product.category || (categories[0]?.name || '') });
+    setNewProduct({
+      title: product.title || '',
+      price: String(product.price || ''),
+      description: product.description || '',
+      image: product.image || '',
+      category: product.category._id || (categories[0]?._id || '')
+    });
   };
 
   const cancelEdit = () => {
     setEditingId(null);
-    setNewProduct({ title: '', price: '', description: '', image: '', category: categories[0]?.name || '' });
+    setNewProduct({ title: '', price: '', description: '', image: '', category: categories[0]?._id || '' });
   };
 
-  const filteredProducts = products.filter((p) => (productCategoryFilter === 'Todas' ? true : p.category === productCategoryFilter));
+  // Filtro por _id de categoría
+  const filteredProducts = products.filter((p) =>
+    productCategoryFilter === 'Todas' ? true : p.category?._id === productCategoryFilter
+  );
 
   return { products, categories, isLoading, error, newProduct, setNewProduct, productCategoryFilter, setProductCategoryFilter, filteredProducts, handleSaveProduct, deleteProduct, toggleProductActive, handleEditClick, editingId, cancelEdit };
 }

@@ -22,7 +22,7 @@ export function ProductCard({ product }: ProductCardProps) {
       image: product.image,
       quantity: 1, 
       adicionales: {}, 
-      category: product.category
+      category: product.category.name
     });  
   };
 

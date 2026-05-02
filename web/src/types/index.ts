@@ -5,14 +5,20 @@ export interface AuthResponse {
 }
 
 // --- PRODUCTOS ---
+export interface ProductCategory {
+  _id: string;
+  name: string;
+  active: boolean;
+}
+
 export interface Product {
-  _id: string;          // Cambió de number a string
-  title: string;       // Aaron usa 'title', nosotros usábamos 'name'
+  _id: string;
+  title: string;
   price: number;
   description: string;
   image: string;
-  category: string;
-  active: boolean;     // Nuevo campo para saber si se muestra o no
+  category: ProductCategory  // ← ya no es string
+  active: boolean;
 }
 
 // --- CARRITO ---

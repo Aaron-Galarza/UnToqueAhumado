@@ -21,7 +21,7 @@ export default function Home() {
   const { status, isLoading: isStatusLoading, isStoreOpen, error: statusError, retry: retryStatus } = useStoreStatus();
   const { categories, isLoading: isCategoriesLoading, error: categoriesError, retry: retryCategories } = useCategories();
 
-  const categoriesWithProducts = categories.filter((category) => products.some((product) => product.category === category.name));
+  const categoriesWithProducts = categories.filter((category) => products.some((product) => product.category?.name === category.name));
 
   const effectiveCategory = activeCategory || categoriesWithProducts[0]?.name || '';
 
@@ -30,7 +30,7 @@ export default function Home() {
   const filteredProducts = products.filter((p) => {
     const normalizedName = removeAccents((p.title || '').toLowerCase());
     const normalizedSearch = removeAccents(searchTerm.toLowerCase());
-    return p.category === effectiveCategory && normalizedName.includes(normalizedSearch);
+    return p.category?.name === effectiveCategory && normalizedName.includes(normalizedSearch);
   });
 
   const isPageLoading = isProductsLoading || isCategoriesLoading;

@@ -27,7 +27,7 @@ export function AdminProductCard({ product, editingId, toggleProductActive, hand
           {!product.active && <span className="bg-red-100 text-red-600 text-[9px] font-black px-1.5 py-0.5 rounded uppercase">Inactivo</span>}
         </div>
         <p className="text-[10px] md:text-xs text-gray-500 truncate mb-1">
-          <span className="text-primary">{product.category}</span> • {product.description}
+          <span className="text-primary">{product.category?.name}</span> • {product.description}
         </p>
         <p className={`text-xs md:text-sm font-bold ${!product.active ? 'text-gray-400' : 'text-gray-900'}`}>
           ${product.price.toLocaleString('es-AR')}

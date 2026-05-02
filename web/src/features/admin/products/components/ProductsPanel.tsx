@@ -41,7 +41,7 @@ export function ProductsPanel() {
               <label className="text-[10px] md:text-xs text-gray-500 mb-1 block">Categoría</label>
               <select value={newProduct.category} onChange={(e) => updateNewProduct({ category: e.target.value })} className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:border-primary">
                 {categories.length === 0 && <option value="">Cargando categorías...</option>}
-                {categories.map(cat => <option key={cat._id} value={cat.name}>{cat.name}</option>)}
+                {categories.map(cat => <option key={cat._id} value={cat._id}>{cat.name}</option>)}
               </select>
             </div>
            <div>
@@ -79,7 +79,7 @@ export function ProductsPanel() {
             <h3 className="text-xl md:text-2xl text-gray-900 tracking-wide font-['Bebas_Neue']">Tus Productos</h3>
             <select value={productCategoryFilter} onChange={(e) => setProductCategoryFilter(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-xs md:text-sm rounded-lg px-3 py-1.5 outline-none focus:border-primary cursor-pointer max-w-[200px]">
               <option value="Todas">Todas las categorías</option>
-              {categories.map(cat => <option key={cat._id} value={cat.name}>{cat.name}</option>)}
+              {categories.map(cat => <option key={cat._id} value={cat._id}>{cat.name}</option>)}
             </select>
           </div>
           
