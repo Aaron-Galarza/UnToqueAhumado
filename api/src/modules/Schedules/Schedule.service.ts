@@ -8,25 +8,41 @@ export const checkStoreStatus = async () => {
     if (config.isAllClose) return { isClose: true, message: "Negocio cerrado" };
 
     const now = new Date();
-    // Ajuste de hora: MongoDB suele usar UTC, asegurate de manejar la hora local de Argentina
-    const options: Intl.DateTimeFormatOptions = { timeZone: 'America/Argentina/Buenos_Aires', weekday: 'long', hour: '2-digit', minute: '2-digit', hour12: false };
+    const options: Intl.DateTimeFormatOptions = { 
+        timeZone: 'America/Argentina/Buenos_Aires', 
+        weekday: 'long', 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        hour12: false 
+    };
     const formatter = new Intl.DateTimeFormat('es-AR', options);
-    
     const parts = formatter.formatToParts(now);
-    const dayName = parts.find(p => p.type === 'weekday')?.value; // Ej: "miércoles"
-    const currentTime = `${parts.find(p => p.type === 'hour')?.value}:${parts.find(p => p.type === 'minute')?.value}`;
 
-    // Buscamos el horario de hoy (ojo con las tildes y mayúsculas)
+    const dayName = parts.find(p => p.type === 'weekday')?.value;
+    const hour = parts.find(p => p.type === 'hour')?.value;
+    const minute = parts.find(p => p.type === 'minute')?.value;
+    const currentTime = `${hour}:${minute}`;
+
+    // 👇 LOGS TEMPORALES - sacalos una vez que confirmes que funciona
+    console.log('UTC now:', now.toISOString())
+    console.log('Día calculado:', dayName)
+    console.log('Hora calculada:', currentTime)
+    console.log('Schedules en DB:', config.dailySchedule.map(s => s.day))
+
     const todaySchedule = config.dailySchedule.find(s => 
         s.day.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 
         dayName?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     );
+
+    console.log('Schedule encontrado:', todaySchedule ?? 'NINGUNO')
 
     if (!todaySchedule || !todaySchedule.isStoreOpen) {
         return { isClose: true, message: "Hoy el local permanece cerrado" };
     }
 
     const isOpen = currentTime >= todaySchedule.openTime && currentTime <= todaySchedule.closeTime;
+
+    console.log(`Comparación: "${currentTime}" >= "${todaySchedule.openTime}" && <= "${todaySchedule.closeTime}" → ${isOpen}`)
 
     return {
         isOpen,
