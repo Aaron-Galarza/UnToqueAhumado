@@ -38,7 +38,7 @@ export const createNewProduct = async (req: Request, res: Response) => {
 
 export const updateProduct = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params.id as string
+    const { id } = req.params as { id: string }
 
     if (req.body.category) {
       const categoriaValida = await CategoriaService.findById(req.body.category)
@@ -57,7 +57,7 @@ export const updateProduct = async (req: Request, res: Response) => {
 
 export const activeStatusProduct = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params.id as string
+    const { id } = req.params as { id: string }
     const product = await ProductService.toggleActive(id)
     if (!product) return sendError(res, 'Producto no encontrado', 404)
     return sendSucces(res, product, 200)
@@ -68,7 +68,7 @@ export const activeStatusProduct = async (req: Request, res: Response) => {
 
 export const deleteProduct = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params.id as string
+    const { id } = req.params as { id: string }
     const result = await ProductService.deleteById(id)
     if (!result) return sendError(res, 'Producto no encontrado', 404)
     return sendSucces(res, result)
