@@ -23,7 +23,7 @@ export function OrderCard({ order, updateOrderStatus }: OrderCardProps) {
   const handleWhatsAppClick = () => {
     const cleanPhone = order.customer.phone.replace(/[^0-9]/g, '');
     const listaProductos = order.items.map(i => `${i.quantity}x ${i.title}${i.addons?.length ? ' (+ Extras)' : ''}`).join(', ');
-    const mensaje = `¡Hola ${order.customer.name}! Te escribimos de Un Toque Ahumado 🔥. Te aviso que tu pedido (${listaProductos}) ya está ${STATUS_LABELS[order.status].toLowerCase()}.`;
+    const mensaje = `¡Hola ${order.customer.name}! Te escribimos de Un Toque Ahumado . Te aviso que tu pedido (${listaProductos}) ya está siendo preparado}.`;
     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(mensaje)}`, '_blank');
   };
 

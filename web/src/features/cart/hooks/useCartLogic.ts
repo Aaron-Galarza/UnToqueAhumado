@@ -6,12 +6,17 @@ import { useCartStore, CartItemWithExtras } from '@/stores/cartStore';
 import { api } from '@/lib/api';
 import { Product } from '@/types';
 import { Addon, useAddons } from '@/features/menu/hooks/useAddons';
+// Asegurate de que esta ruta apunte a donde guardaste tu useStoreStatus
+import { useStoreStatus } from '@/stores/useStoreStatus'; 
 
 type FeedbackType = 'error' | 'success' | null;
 
 export function useCartLogic() {
   const router = useRouter();
   const { addons } = useAddons();
+  
+  // --- ZONA DE HORARIOS Y ESTADO DEL LOCAL ---
+  const { isStoreOpen, status: storeStatus, isLoading: isStoreLoading } = useStoreStatus();
 
   // --- ZONA DE ESTADOS GLOBALES ---
   const cartItems = useCartStore((state) => state.items);
@@ -101,6 +106,16 @@ export function useCartLogic() {
   };
 
   const handleConfirmOrder = async () => {
+    // --- BARRERA 1: ¿ESTÁ ABIERTO EL LOCAL? ---
+    if (!isStoreOpen) {
+      setSubmitType('error');
+      // Le mostramos el mensaje exacto que manda Aaron (ej: "Abrimos a las 20:00")
+      setSubmitMessage(`No podemos recibir el pedido: ${storeStatus?.message || 'El local se encuentra cerrado.'}`);
+      window.scrollTo({ top: 300, behavior: 'smooth' });
+      return;
+    }
+
+    // --- BARRERA 2: VALIDACIÓN DEL FORMULARIO ---
     const { isValid, newErrors } = validateForm();
 
     if (!isValid) {
@@ -167,5 +182,8 @@ export function useCartLogic() {
     handleRemoveItem, updateMainQuantity, setAdicional, handleCustomerDataChange,
     handleClearCart, handleConfirmOrder, isSubmitting, orderData, router,
     submitMessage, submitType,
+    
+    // Exportamos estas variables por si querés hacer cosas visuales en tu UI del carrito
+    isStoreOpen, storeStatus, isStoreLoading 
   };
 }
