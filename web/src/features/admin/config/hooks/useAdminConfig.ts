@@ -26,7 +26,9 @@ export function useAdminConfig() {
       toast.success('Estado del local actualizado.');
       return true;
     }
-    toast.error(`No pudimos cambiar el estado del local: ${response.error}`);
+    if (response.status !== 403) {
+      toast.error(`No pudimos cambiar el estado del local: ${response.error}`);
+    }
     return false;
   };
 

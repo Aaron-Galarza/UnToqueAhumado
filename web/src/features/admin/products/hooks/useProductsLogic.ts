@@ -52,13 +52,15 @@ export function useProductsLogic() {
       fetchProducts();
       cancelEdit();
       toast.success(editingId ? 'Producto actualizado.' : 'Producto creado.');
-    } else toast.error(`Error al guardar: ${response.error || 'Verificá que la categoría sea válida'}`);
+    } else if (response.status !== 403) {
+      toast.error(`Error al guardar: ${response.error || 'Verificá que la categoría sea válida'}`);
+    }
   };
 
   const deleteProduct = async (id: string) => {
     const response = await api.delete(`/api/productos/admin/${id}`);
     if (response.success) { fetchProducts(); toast.success('Producto eliminado.'); }
-    else toast.error(`Error al eliminar: ${response.error}`);
+    else if (response.status !== 403) toast.error(`Error al eliminar: ${response.error}`);
   };
 
   const toggleProductActive = async (id: string) => {

@@ -34,7 +34,9 @@ export function useAdminCategories() {
       toast.success('Categoría creada.');
       return { success: true };
     }
-    toast.error(response.error || 'No se pudo crear la categoría.');
+    if (response.status !== 403) {
+      toast.error(response.error || 'No se pudo crear la categoría.');
+    }
     return { success: false, error: response.error };
   };
 
@@ -45,7 +47,9 @@ export function useAdminCategories() {
       toast.success('Categoría actualizada.');
       return { success: true };
     }
-    toast.error(response.error || 'No se pudo actualizar la categoría.');
+    if (response.status !== 403) {
+      toast.error(response.error || 'No se pudo actualizar la categoría.');
+    }
     return { success: false, error: response.error };
   };
 
@@ -55,7 +59,9 @@ export function useAdminCategories() {
       fetchCategories();
       return { success: true };
     }
-    toast.error(response.error || 'No se pudo cambiar el estado de la categoría.');
+    if (response.status !== 403) {
+      toast.error(response.error || 'No se pudo cambiar el estado de la categoría.');
+    }
     return { success: false, error: response.error };
   };
 
@@ -66,7 +72,9 @@ export function useAdminCategories() {
       toast.success('Categoría eliminada.');
       return { success: true };
     }
-    toast.error(response.error || 'No se pudo eliminar la categoría.');
+    if (response.status !== 403) {
+      toast.error(response.error || 'No se pudo eliminar la categoría.');
+    }
     return { success: false, error: response.error };
   };
 

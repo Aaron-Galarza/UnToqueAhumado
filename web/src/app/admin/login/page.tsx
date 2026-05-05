@@ -3,9 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Lock } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useLogin } from '@/features/admin/login/useLogin'; // Ajustá la ruta de ser necesario
 
 export default function AdminLoginPage() {
+  const SESSION_EXPIRED_FLAG = 'session_expired';
+  const SESSION_EXPIRED_TOAST_ID = 'session-expired';
   const router = useRouter();
   const { 
     email, setEmail, 
@@ -22,6 +25,10 @@ export default function AdminLoginPage() {
       // Si hay token, lo mandamos al panel (no cambiamos isChecking a false para que no haya flashazo)
       router.push('/admin');
     } else {
+      if (sessionStorage.getItem(SESSION_EXPIRED_FLAG) === '1') {
+        toast.error('Tu sesión expiró. Volvé a iniciar sesión.', { id: SESSION_EXPIRED_TOAST_ID });
+        sessionStorage.removeItem(SESSION_EXPIRED_FLAG);
+      }
       // Si no hay token, bajamos el "telón" de carga y mostramos el formulario
       setIsChecking(false);
     }

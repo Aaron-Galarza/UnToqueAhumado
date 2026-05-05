@@ -38,7 +38,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col relative pb-9">
-      <section className="w-full relative rounded-b-[2.5rem] shadow-md z-10 flex flex-col items-center justify-center pt-12 pb-16 bg-cover bg-center bg-[url('https://res.cloudinary.com/dwqxdensk/image/upload/v1777344079/Web_Photo_Editor_igrfxj.jpg')]">
+      <section className="w-full relative rounded-b-[2.5rem] shadow-md z-10 flex flex-col items-center justify-center pt-12 pb-16 bg-cover bg-center bg-[url('https://res.cloudinary.com/dwqxdensk/image/upload/v1777929409/WhatsApp_Image_2026-05-04_at_18.03.04_n01w0h.jpg')]">
         <div className="w-24 h-24 rounded-full border-[3px] border-white/90 bg-white shadow-xl flex items-center justify-center overflow-hidden mb-4">
           <img
             src="https://res.cloudinary.com/dwqxdensk/image/upload/v1774491741/image_so7u3x.png"
@@ -46,11 +46,13 @@ export default function Home() {
             className="w-5/6 h-5/6 object-contain"
           />
         </div>
-        <h1 className="text-center relative z-10 leading-none font-bold text-white tracking-widest text-4xl md:text-5xl">
+        <h1 className="text-center relative z-10 leading-none font-bold text-white tracking-widest text-4xl md:text-5xl block drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]">
           UN TOQUE <br />
-          <span className="text-primary mt-1 block">AHUMADO</span>
+          <span className="text-primary mt-1 block drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]">
+  AHUMADO
+</span>
         </h1>
-        <p className="mt-3 font-bold tracking-[0.2em] uppercase text-xs text-orange-700">Burguers artesanales premium</p>
+        <p className="mt-3 font-bold tracking-[0.2em] uppercase text-xs text-orange-100">Burguers artesanales premium</p>
       </section>
 
       <main className="flex-1 w-full max-w-3xl mx-auto px-4 relative z-20 -mt-6">

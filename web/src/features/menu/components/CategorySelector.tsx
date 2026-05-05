@@ -28,19 +28,19 @@ const FriesIcon = ({ className }: { className?: string }) => (
     <rect x="15.5" y="10" width="2.5" height="10" rx="1.25" fill="currentColor"/>
     <path d="M5 10H19L18 20.5C17.9 21.3 17.2 22 16.4 22H7.6C6.8 22 6.1 21.3 6 20.5L5 10Z" stroke="currentColor" strokeWidth="1.3" fill="none"/>
     <path d="M4 10H20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M8 10L7 7M12 10L12 6.5M16 10L17 7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+    <path d="M8 10L7 7M12 10L12 6.5M16 10L17" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
     <path d="M7 7C7 5.5 8.5 4.5 8.5 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
     <path d="M12 6.5C12 5 13.5 4 13.5 2.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
     <path d="M17 7C17 5.5 15.5 4.5 15.5 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
   </svg>
 );
 
-// 📖 EL DICCIONARIO DE ÍCONOS (Clave en minúsculas y sin acentos)
+// 📖 EL DICCIONARIO DE ÍCONOS
 const ICON_DICTIONARY: Record<string, React.FC<{className?: string}>> = {
   'promos': PromoIcon,
   'hamburguesas artesanales': BurgerIcon,
   'acompanamientos': FriesIcon,
-  'bebidas': CupSoda,     // <-- Ejemplo genérico para el futuro
+  'bebidas': CupSoda,     
 };
 
 // MOTOR DE BÚSQUEDA DEL DICCIONARIO
@@ -52,10 +52,10 @@ const getCategoryIcon = (categoryName: string) => {
     if (normalized.includes(normalizedKey)) return Icon;
   }
   
-  return Utensils; // El comodín si no encontramos nada
+  return Utensils;
 };
 
-// NUEVAS PROPS: Ahora recibe la data de afuera
+// NUEVAS PROPS
 interface CategorySelectorProps {
   categories: Category[];
   isLoading: boolean;
@@ -86,7 +86,8 @@ export function CategorySelector({ categories, isLoading, activeCategory, onSele
           <button
             key={c._id}
             onClick={() => onSelectCategory(c.name)}
-            className={`snap-center flex flex-col items-center w-20 md:w-24 shrink-0 gap-2 transition-all duration-300 ${
+            // 👇 ACÁ ESTÁ LA MAGIA PARA MATAR EL BUG DE MOTOROLA/GOOGLE 👇
+            className={`outline-none focus:outline-none [-webkit-tap-highlight-color:transparent] snap-center flex flex-col items-center w-20 md:w-24 shrink-0 gap-2 transition-all duration-300 ${
               activeCategory === c.name ? 'text-primary scale-105' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
@@ -96,7 +97,7 @@ export function CategorySelector({ categories, isLoading, activeCategory, onSele
               <IconComponent className="w-7 h-7 md:w-8 md:h-8" />
             </div>
             
-          <span className="text-[9px] md:text-xs font-bold text-center leading-[1.1] tracking-wide px-1">
+            <span className="text-[9px] md:text-xs font-bold text-center leading-[1.1] tracking-wide px-1">
               {c.name}
             </span>
           </button>

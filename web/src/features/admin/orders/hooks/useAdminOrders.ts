@@ -55,7 +55,9 @@ export function useAdminOrders() {
       setError(null);
     } else {
       setError(response.error || 'Error al cargar los pedidos.');
-      toast.error(response.error || 'Error al cargar los pedidos.');
+      if (response.status !== 403) {
+        toast.error(response.error || 'Error al cargar los pedidos.');
+      }
     }
     setIsLoading(false);
   }, [dateRange]); // <-- Se vuelve a ejecutar si cambia el rango
@@ -86,7 +88,9 @@ export function useAdminOrders() {
     setOrders((prev) => prev.map((o) => (o._id === orderId || o.id === orderId ? { ...o, status: newStatus } : o)));
     const response = await api.put(`/api/orders/admin/${orderId}`, { status: newStatus });
     if (!response.success) {
-      toast.error(`Error al actualizar estado: ${response.error}`);
+      if (response.status !== 403) {
+        toast.error(`Error al actualizar estado: ${response.error}`);
+      }
       fetchOrders();
     }
   };

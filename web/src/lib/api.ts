@@ -7,6 +7,26 @@ export interface ApiResponse<T = unknown> {
   status?: number;
 }
 
+let isHandlingForbidden = false;
+const SESSION_EXPIRED_FLAG = 'session_expired';
+
+function handleForbiddenOnce() {
+  if (typeof window === 'undefined' || isHandlingForbidden) return;
+  isHandlingForbidden = true;
+
+  localStorage.removeItem('token');
+  sessionStorage.setItem(SESSION_EXPIRED_FLAG, '1');
+
+  if (window.location.pathname !== '/admin/login') {
+    window.location.replace('/admin/login');
+    return;
+  }
+
+  setTimeout(() => {
+    isHandlingForbidden = false;
+  }, 1000);
+}
+
 async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
   try {
     const url = `${API_URL}${endpoint}`;
@@ -29,10 +49,14 @@ async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise
     });
 
     if (!response.ok) {
+      if (response.status === 403) {
+        handleForbiddenOnce();
+      }
+
       const errorData = await response.json().catch(() => ({}));
       return {
         success: false,
-        error: errorData.message || `Error del servidor: ${response.status}`,
+        error: response.status === 403 ? '' : (errorData.message || `Error del servidor: ${response.status}`),
         status: response.status,
       };
     }

@@ -29,6 +29,7 @@ export function useAnalytics() {
       if (response.success && response.data) {
         setData(response.data);
       } else {
+        if (response.status === 403) return;
         toast.error('No se pudieron cargar las estadísticas.');
       }
     } catch (error) {

@@ -92,7 +92,7 @@ export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onUpdateAdi
           <button 
             // Y ACÁ
             onClick={() => onUpdateQuantity(uniqueId, 1)}
-            disabled={item.quantity >= 10}
+            disabled={item.quantity >= 30}
             className="w-8 h-8 flex items-center justify-center bg-background rounded-lg shadow-sm text-foreground hover:text-primary transition-colors disabled:opacity-50 cursor-pointer"
           >
             <Plus className="w-4 h-4" />

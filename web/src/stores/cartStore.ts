@@ -36,6 +36,7 @@ const initialOrderData: OrderData = {
   deliveryType: 'pickup', 
   paymentMethod: 'Efectivo',
 };
+const MAX_CART_UNITS = 30;
 
 // --- HELPERS MÁGICOS ---
 const generateUniqueId = () => Math.random().toString(36).substring(2, 9);
@@ -67,7 +68,8 @@ export const useCartStore = create<CartState>()(
 
         if (existingItemIndex >= 0) {
           const newItems = [...state.items];
-          newItems[existingItemIndex].quantity += newItem.quantity;
+          const mergedQty = newItems[existingItemIndex].quantity + newItem.quantity;
+          newItems[existingItemIndex].quantity = Math.min(MAX_CART_UNITS, Math.max(1, mergedQty));
           return { items: newItems };
         }
         
@@ -83,7 +85,7 @@ export const useCartStore = create<CartState>()(
       updateQuantity: (cartItemId, delta) => set((state) => ({
         items: state.items.map(item => {
           if ((item.cartItemId || item.productId) !== cartItemId) return item;
-          const nextQty = Math.min(10, Math.max(1, item.quantity + delta));
+          const nextQty = Math.min(MAX_CART_UNITS, Math.max(1, item.quantity + delta));
           return { ...item, quantity: nextQty };
         })
       })),
@@ -110,9 +112,14 @@ export const useCartStore = create<CartState>()(
           const matchingIndex = newItems.findIndex((otherItem, idx) => idx !== itemIndex && isSameItem(otherItem, tempItemForComparison));
           
           if (matchingIndex >= 0) {
-            // ¡FUSIÓN! La sumamos a la otra y borramos esta
-            newItems[matchingIndex].quantity += 1;
-            newItems.splice(itemIndex, 1);
+            if (newItems[matchingIndex].quantity < MAX_CART_UNITS) {
+              // ¡FUSIÓN! La sumamos a la otra y borramos esta
+              newItems[matchingIndex].quantity += 1;
+              newItems.splice(itemIndex, 1);
+            } else {
+              // Si ya llegó al tope, mantenemos el item separado.
+              newItems[itemIndex] = { ...item, adicionales: newAdicionales };
+            }
           } else {
             // No hay otra igual, solo le actualizamos sus datos
             newItems[itemIndex] = { ...item, adicionales: newAdicionales };
@@ -129,8 +136,19 @@ export const useCartStore = create<CartState>()(
         const matchingIndex = newItems.findIndex(otherItem => isSameItem(otherItem, tempItemForComparison));
 
         if (matchingIndex >= 0) {
-          // Si ya existe, le sumamos 1 a ese grupo
-          newItems[matchingIndex].quantity += 1;
+          // Si ya existe y no llegó al tope, le sumamos 1 a ese grupo
+          if (newItems[matchingIndex].quantity < MAX_CART_UNITS) {
+            newItems[matchingIndex].quantity += 1;
+          } else {
+            // Si llegó al tope, creamos la unidad separada para no perderla.
+            const separatedItem = {
+              ...item,
+              cartItemId: generateUniqueId(),
+              quantity: 1,
+              adicionales: newAdicionales
+            };
+            newItems.splice(itemIndex + 1, 0, separatedItem);
+          }
         } else {
           // Si no existe, creamos la nueva tarjetita y la ponemos abajo del original
           const separatedItem = {

@@ -31,7 +31,9 @@ export function useAdminCoupons() {
       toast.success('Cupón creado.');
       return true;
     }
-    toast.error(`Error al crear cupón: ${response.error}`);
+    if (response.status !== 403) {
+      toast.error(`Error al crear cupón: ${response.error}`);
+    }
     return false;
   };
 
@@ -39,7 +41,9 @@ export function useAdminCoupons() {
     setCoupons((prev) => prev.filter((c) => c.id !== id && c._id !== id));
     const response = await api.delete(`/api/coupons/admin/${id}`);
     if (!response.success) {
-      toast.error(`Error al eliminar: ${response.error}`);
+      if (response.status !== 403) {
+        toast.error(`Error al eliminar: ${response.error}`);
+      }
       fetchCoupons();
       return false;
     }
