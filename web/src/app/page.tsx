@@ -38,7 +38,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col relative pb-9">
-      <section className="w-full relative rounded-b-[2.5rem] shadow-md z-10 flex flex-col items-center justify-center pt-12 pb-16 bg-cover bg-center bg-[url('https://res.cloudinary.com/dwqxdensk/image/upload/v1777929409/WhatsApp_Image_2026-05-04_at_18.03.04_n01w0h.jpg')]">
+      <section className="w-full relative rounded-b-[2.5rem] shadow-md z-10 flex flex-col items-center justify-center pt-12 pb-16 bg-cover bg-center bg-[url('https://res.cloudinary.com/djhfc1hjo/image/upload/q_auto/f_auto/v1777950957/IMG_0702_twwrp9.jpg')]">
         <div className="w-24 h-24 rounded-full border-[3px] border-white/90 bg-white shadow-xl flex items-center justify-center overflow-hidden mb-4">
           <img
             src="https://res.cloudinary.com/dwqxdensk/image/upload/v1774491741/image_so7u3x.png"

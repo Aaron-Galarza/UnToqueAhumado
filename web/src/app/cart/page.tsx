@@ -12,9 +12,11 @@ import { CartSummary } from '@/features/cart/components/CartSummary';
 import { ConfirmButton } from '@/features/cart/components/ConfirmButton';
 import { PaymentSelector } from '@/features/cart/components/PaymentSelector';
 import { useState } from 'react';
+import { useAddons } from '@/features/menu/hooks/useAddons';
 
 export default function CartPage() {
   const [isConfirmingClear, setIsConfirmingClear] = useState(false);
+  const { addons, isLoading: addonsLoading } = useAddons();
   // Extraemos las variables actualizadas del hook, eliminando las obsoletas (ej. promoCode)
   const {
     cartItems, paymentMethod, setPaymentMethod, deliveryType, setDeliveryType,
@@ -62,6 +64,8 @@ export default function CartPage() {
               onUpdateQuantity={updateMainQuantity} 
               onRemoveItem={handleRemoveItem} 
               onUpdateAdicional={setAdicional}
+              addons={addons}
+              addonsLoading={addonsLoading}
             />
           ))}
           

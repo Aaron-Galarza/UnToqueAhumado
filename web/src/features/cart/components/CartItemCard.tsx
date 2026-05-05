@@ -2,7 +2,7 @@
 
 import { Plus, Minus, Trash2 } from 'lucide-react';
 import { CartItemWithExtras } from '@/stores/cartStore'; 
-import { useAddons } from '@/features/menu/hooks/useAddons'; 
+import { Addon } from '@/features/menu/hooks/useAddons';
 import { canHaveExtras } from '@/features/cart/data/cartRules';
 
 interface CartItemCardProps {
@@ -11,11 +11,11 @@ interface CartItemCardProps {
   onUpdateQuantity: (id: string, delta: number) => void;
   onRemoveItem: (id: string) => void;
   onUpdateAdicional: (id: string, adId: string, delta: number) => void;
+  addons: Addon[];
+  addonsLoading: boolean;
 }
 
-export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onUpdateAdicional }: CartItemCardProps) {
-  const { addons, isLoading: addonsLoading } = useAddons(); 
-
+export function CartItemCard({ item, onUpdateQuantity, onRemoveItem, onUpdateAdicional, addons, addonsLoading }: CartItemCardProps) {
   const extrasTotal = addons.reduce((acc, extra) => {
     return acc + (item.adicionales?.[extra._id] || 0) * extra.price;
   }, 0);
