@@ -13,7 +13,7 @@ interface ProductListProps {
 export function ProductList({ products, isLoading, error, onRetry }: ProductListProps) {
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-3 mt-4">
+      <div className="flex flex-col gap-3.5 mt-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="bg-card border border-border rounded-2xl p-4 shadow-sm animate-pulse">
             <div className="h-4 w-2/3 bg-secondary rounded mb-3" />
@@ -51,7 +51,7 @@ export function ProductList({ products, isLoading, error, onRetry }: ProductList
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3.5">
       {products.map((product) => (
         <ProductCard key={product._id} product={product} />
       ))}
