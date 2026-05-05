@@ -3,41 +3,38 @@ import * as CouponService from '../coupons/coupons.services'
 import * as ProductService from '../productos/products.service'
 import * as AdicionalService from '../adicionales/adicionales.service'
 import { updateAnalyticsOnDelivery, revertAnalyticsOnDelivery } from '../analytics/analytics.service'
-import { startOfWeek, startOfMonth, format, subDays } from 'date-fns';
 import { checkStoreStatus } from '../Schedules/Schedule.service'
+import { argDate, argToUTC } from '../../utils/Timezone'
 
 export const createOrder = async (orderData: any): Promise<iOrder> => {
-
+ 
+  const storeStatus = await checkStoreStatus()
+  if (storeStatus.isClose || !storeStatus.isOpen) {
+    throw new Error(storeStatus.message || 'El negocio está cerrado en este momento')
+  }
+ 
   const items: iCartItem[] = await Promise.all(
     orderData.items.map(async (item: any) => {
-
-      const storeStatus = await checkStoreStatus()
-      if (storeStatus.isClose || !storeStatus.isOpen) {
-        throw new Error(storeStatus.message || 'El negocio está cerrado en este momento')
-      }
-
-      // Snapshot del producto: precio real del catálogo
+ 
       const product = await ProductService.viewById(item.productId)
       if (!product) throw new Error(`Producto ${item.productId} no encontrado`)
-
-      // Snapshot de adicionales si vienen en el item
+ 
       let addons: iCartAddon[] = []
       if (item.addons && item.addons.length > 0) {
         addons = await Promise.all(
           item.addons.map(async (a: any) => {
             const adicional = await AdicionalService.viewById(a.addonId)
             if (!adicional) throw new Error(`Adicional ${a.addonId} no encontrado`)
-
             return {
               addonId:  a.addonId,
               title:    adicional.title,
-              price:    adicional.price,  // precio real del catálogo
+              price:    adicional.price,
               quantity: a.quantity
             }
           })
         )
       }
-
+ 
       return {
         productId: item.productId,
         title:     product.title,
@@ -47,23 +44,21 @@ export const createOrder = async (orderData: any): Promise<iOrder> => {
       }
     })
   )
-
-  // Total: suma productos + adicionales de cada item
+ 
   const subTotal = items.reduce((acc, item) => {
     const itemTotal   = item.price * item.quantity
     const addonsTotal = (item.addons || []).reduce((a, addon) => a + addon.price * addon.quantity, 0)
     return acc + itemTotal + addonsTotal
   }, 0)
-
+ 
   let total = subTotal
   if (orderData.couponCode) {
     const coupon = await CouponService.search(orderData.couponCode)
     if (!coupon) throw new Error('El cupon ingresado no es valido')
-
     const discount = (subTotal * coupon.Percent) / 100
     total = subTotal - discount
   }
-
+ 
   const newOrder = new OrderModel({
     customer:      orderData.customer,
     items,
@@ -72,7 +67,7 @@ export const createOrder = async (orderData: any): Promise<iOrder> => {
     couponCode:    orderData.couponCode,
     total:         Math.max(0, total)
   })
-
+ 
   const saved = await newOrder.save()
   console.log(`[PEDIDO] Nuevo pedido ${saved._id} - ${saved.customer.name} - $${saved.total}`)
   return saved
@@ -82,33 +77,44 @@ export const getAllOrders = async (): Promise<iOrder[]> => {
   return await OrderModel.find().sort({ createdAt: -1 })
 }
 
-export const getOrdersRange = async (range: 'hoy' | 'ayer' | 'semana' | 'mes'): Promise<iOrder[] | null> => {
-
-  const now = new Date();
-
-  let startDate: Date;
-  let endDate: Date | null = null;
-
-  if (range === 'hoy') {
-    startDate = new Date(format(now, 'yyyy-MM-dd') + 'T00:00:00.000Z');
-  } else if (range === 'ayer') {
-    const yesterday = subDays(now, 1);
-    startDate = new Date(format(yesterday, 'yyyy-MM-dd') + 'T00:00:00.000Z');
-    endDate   = new Date(format(now, 'yyyy-MM-dd') + 'T00:00:00.000Z');
-  } else if (range === 'semana') {
-    startDate = startOfWeek(now, { weekStartsOn: 1 });
-  } else {
-    startDate = startOfMonth(now);
+export const getOrdersRange = async (range: 'hoy' | 'ayer' | 'semana' | 'mes'): Promise<iOrder[]> => {
+ 
+  const today = argDate();                  
+  let start: Date;
+  let end: Date | null = null;
+ 
+  switch (range) {
+    case 'hoy':
+      start = argToUTC(today);               
+      break;
+ 
+    case 'ayer': {
+      const d = new Date(today + 'T12:00:00Z');
+      d.setUTCDate(d.getUTCDate() - 1);
+      const ayer = d.toISOString().slice(0, 10);
+      start = argToUTC(ayer);                
+      end   = argToUTC(today);               
+      break;
+    }
+ 
+    case 'semana': {
+      // Lunes de esta semana
+      const d = new Date(today + 'T12:00:00Z');
+      const dow = d.getUTCDay();             // 0=dom, 1=lun...
+      d.setUTCDate(d.getUTCDate() - (dow === 0 ? 6 : dow - 1));
+      start = argToUTC(d.toISOString().slice(0, 10));
+      break;
+    }
+ 
+    case 'mes':
+      start = argToUTC(today.slice(0, 8) + '01'); 
+      break;
   }
-
-  const dateFilter: any = { $gte: startDate };
-  if (endDate) dateFilter.$lt = endDate;
-
-  const orders = await OrderModel.find({
-    createdAt: dateFilter,
-  }).lean().sort({ createdAt: -1 });
-
-  return orders;
+ 
+  const filter: any = { $gte: start };
+  if (end) filter.$lt = end;
+ 
+  return await OrderModel.find({ createdAt: filter }).lean().sort({ createdAt: -1 });
 }
 
 export const update = async (
