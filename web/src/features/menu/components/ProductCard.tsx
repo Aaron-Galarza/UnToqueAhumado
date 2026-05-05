@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"; // 1. Agregamos React acá
 import { ChevronDown, Plus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Product } from "@/types/index";
@@ -9,7 +9,8 @@ interface ProductCardProps {
   product: Product;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+// 2. Envolvemos TODO el componente en React.memo()
+export const ProductCard = React.memo(function ProductCard({ product }: ProductCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
@@ -88,10 +89,12 @@ export function ProductCard({ product }: ProductCardProps) {
             {product.category?.name}
           </span>
 
-          <div className="relative w-full h-48 md:h-64 mb-8">
+          <div className="relative w-full h-48 md:h-64 mb-8 bg-muted/30 rounded-xl">
             <img
               src={product.image}
               alt={product.title}
+              loading="lazy"          // 3. Magia para la memoria RAM
+              decoding="async"        // 4. Magia para que la animación no se trabe
               className="w-full h-full object-cover rounded-xl shadow-sm border border-border"
             />
           </div>
@@ -123,10 +126,12 @@ export function ProductCard({ product }: ProductCardProps) {
             </span>
           </div>
 
-          <div className="relative w-24 h-24 md:w-28 md:h-28 shrink-0">
+          <div className="relative w-24 h-24 md:w-28 md:h-28 shrink-0 bg-muted/30 rounded-xl">
             <img
               src={product.image}
               alt={product.title}
+              loading="lazy"          // 3. Magia para la memoria RAM
+              decoding="async"        // 4. Magia para que la animación no se trabe
               className="w-full h-full object-cover rounded-xl shadow-sm border border-border group-hover:scale-105 transition-transform duration-250"
             />
             {/* Flecha arriba → sugiere expandir */}
@@ -146,4 +151,4 @@ export function ProductCard({ product }: ProductCardProps) {
       )}
     </Card>
   );
-}
+}); // 5. Cerramos el React.memo()
