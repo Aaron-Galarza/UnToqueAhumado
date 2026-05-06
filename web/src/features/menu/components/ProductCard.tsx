@@ -28,7 +28,7 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
 
   const toggleExpanded = () => setIsExpanded((prev) => !prev);
 
-  // 👇 EL BISTURÍ MÁGICO: Interceptamos y achicamos la imagen a 600px
+  // 👇 EL BISTURÍ MÁGICO: Interceptamos y achicamos la imagen a 900px
   const optimizedImage = product.image ? product.image.replace('/upload/', '/upload/w_900/') : '';
 
   return (
@@ -68,7 +68,7 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
             <p className="text-sm text-muted-foreground font-medium pr-1">{product.description}</p>
           </div>
         ) : (
-          /* VISTA CONTRAÍDA - Imagen un poco más grande */
+          /* VISTA CONTRAÍDA - Imagen un poco más pequeña en móvil para dar aire al texto */
           <div className="flex flex-row justify-between items-center gap-4 animate-in fade-in duration-150">
             <div className="flex-1 min-w-0">
               <h3 className="font-bold text-[15px] truncate mb-1 group-hover:text-primary transition-colors">{product.title}</h3>
@@ -76,8 +76,8 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
               <span className="font-extrabold text-primary">${product.price.toLocaleString("es-AR")}</span>
             </div>
 
-            {/* 👇 ACÁ ESTÁ EL CAMBIO (w-28 h-28) 👇 */}
-            <div className="relative w-28 h-28 shrink-0">
+            {/* 👇 ACÁ ESTÁ EL CAMBIO (w-24 h-24 para celular, w-28 h-28 para PC) 👇 */}
+            <div className="relative w-24 h-24 md:w-28 md:h-28 shrink-0">
               <img
                 src={optimizedImage} // <-- Usamos la imagen optimizada
                 alt={product.title}
