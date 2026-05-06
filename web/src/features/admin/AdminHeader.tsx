@@ -14,10 +14,21 @@ export function AdminHeader() {
     router.push('/');
   };
 
+  // 3. Redirigir al inicio (página del cliente)
+  const handleGoHome = () => {
+    router.push('/');
+  };
+
   return (
     <header className="bg-[#FFF9F5] border-b border-[#FFE8D9] px-4 md:px-6 py-4 sticky top-0 z-50 shadow-sm">
       <div className="max-w-[1400px] mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-3 md:gap-4">
+        
+        {/* Contenedor del logo y título redirige al home */}
+        <div 
+          onClick={handleGoHome}
+          className="flex items-center gap-3 md:gap-4 cursor-pointer transition-opacity hover:opacity-80"
+          title="Ir a la página principal"
+        >
           <img src="https://res.cloudinary.com/dwqxdensk/image/upload/v1774491741/image_so7u3x.png" alt="Un Toque Ahumado" className="w-10 h-10 md:w-12 md:h-12" />
           <div>
             <h1 className="text-xl md:text-2xl text-primary tracking-wider font-['Bebas_Neue']">
@@ -39,6 +50,7 @@ export function AdminHeader() {
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 bg-[#FFF0E5] text-primary border border-primary/30 hover:bg-primary hover:text-white px-3 py-2 md:px-4 md:py-2 rounded-lg transition-all cursor-pointer shadow-sm hover:shadow-md"
+            title="Cerrar sesión de administrador"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="text-sm font-bold hidden sm:inline">Cerrar Sesión</span>

@@ -28,6 +28,9 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
 
   const toggleExpanded = () => setIsExpanded((prev) => !prev);
 
+  // 👇 EL BISTURÍ MÁGICO: Interceptamos y achicamos la imagen a 600px
+  const optimizedImage = product.image ? product.image.replace('/upload/', '/upload/w_900/') : '';
+
   return (
     <Card
       onClick={toggleExpanded}
@@ -48,11 +51,11 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
             {/* 👇 ACÁ ESTÁ EL CAMBIO (h-80) 👇 */}
             <div className="relative w-full h-80 mb-4">
               <img
-                src={product.image}
+                src={optimizedImage} // <-- Usamos la imagen optimizada
                 alt={product.title}
                 loading="eager"
                 decoding="sync"
-                className="w-full h-full object-cover rounded-xl border border-border/50"
+                className="w-full h-full object-cover object-[70%_center] md:object-center rounded-xl border border-border/50"
               />
               <button
                 onClick={(e) => { e.stopPropagation(); handleAddToCart(); }}
@@ -76,7 +79,7 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
             {/* 👇 ACÁ ESTÁ EL CAMBIO (w-28 h-28) 👇 */}
             <div className="relative w-28 h-28 shrink-0">
               <img
-                src={product.image}
+                src={optimizedImage} // <-- Usamos la imagen optimizada
                 alt={product.title}
                 loading="eager"
                 decoding="async"

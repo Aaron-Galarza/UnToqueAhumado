@@ -24,8 +24,8 @@ export default function RootLayout({
         <main className="flex-grow pt-16">
           {children}
         </main>
+        
         <Toaster position="top-right" />
-
         <Footer />
 
       </body>

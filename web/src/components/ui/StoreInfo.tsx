@@ -26,7 +26,7 @@ export function StoreInfo() {
           </div>
           <div className="flex flex-col">
             <span className="text-[9px] md:text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Horario</span>
-            <span className="text-[10px] md:text-xs text-foreground font-black leading-tight">Mar-Dom<br/>18 a 23h</span>
+            <span className="text-[10px] md:text-xs text-foreground font-black leading-tight">Mar-Dom<br/>20:30 a 00h</span>
           </div>
         </div>
 
