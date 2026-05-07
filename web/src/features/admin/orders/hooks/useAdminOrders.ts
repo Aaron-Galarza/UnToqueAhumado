@@ -36,6 +36,12 @@ export interface Addon {
   price: number;
 }
 
+// 👇 LA FUNCIÓN DEL TIMBRE: La definimos fuera del hook para mejor rendimiento
+const playNotificationSound = () => {
+  const audio = new Audio('/ding.mp3'); 
+  audio.play().catch(error => console.log("Audio bloqueado por el navegador hasta que el usuario interactúe."));
+};
+
 export function useAdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -67,6 +73,20 @@ export function useAdminOrders() {
     const socket = getSocket();
     
     socket.on('new-order', (order: Order) => {
+      // 👇 1. HACEMOS SONAR LA CAMPANA ACÁ
+      playNotificationSound();
+      
+      // 👇 2. MOSTRAMOS EL TOAST VISUAL ACÁ
+      toast.success(`¡Nuevo pedido de ${order.customer.name}!`, {
+        duration: 6000, // Queda 6 segundos en pantalla
+        icon: '🍔',
+        style: {
+          fontWeight: 'bold',
+          background: '#FFF0E5',
+          color: '#EA580C',
+        }
+      });
+      
       // Opcional: Solo agregar al estado si estamos en "hoy"
       if (dateRange === 'hoy') {
         setOrders((prev) => [order, ...prev]);
@@ -95,7 +115,6 @@ export function useAdminOrders() {
     }
   };
 
-  // 5. Exponemos dateRange y setDateRange para que la UI pueda usarlos
   return { 
     orders, isLoading, error, refreshOrders: fetchOrders, updateOrderStatus,
     dateRange, setDateRange 

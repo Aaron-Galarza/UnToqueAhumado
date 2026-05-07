@@ -53,7 +53,8 @@ export function CheckoutView() {
       })
       .join('\n');
 
-    const mensaje = `¡Hola Un Toque Ahumado!\nSoy *${orderData.name}* y acabo de realizar un pedido web.\n\n*MI PEDIDO:*\n${listaProductosText}\n\n*ENTREGA:* ${orderData.deliveryType === 'delivery' ? `Delivery a ${orderData.address}` : 'Retiro por el local'}\n*PAGO:* ${orderData.paymentMethod}${orderData.couponCode ? `\n*CUPÓN:* ${orderData.couponCode} (-$${discount})` : ''}\n\n*TOTAL A PAGAR:* $${total.toLocaleString('es-AR')}\n\n¡Quedo a la espera de la confirmación!`;
+    // Cambiamos levemente el texto del mensaje para que también le quede claro a ustedes
+    const mensaje = `¡Hola Un Toque Ahumado!\nSoy *${orderData.name}* y mi pedido web ya ingresó al sistema.\n\n*MI PEDIDO:*\n${listaProductosText}\n\n*ENTREGA:* ${orderData.deliveryType === 'delivery' ? `Delivery a ${orderData.address}` : 'Retiro por el local'}\n*PAGO:* ${orderData.paymentMethod}${orderData.couponCode ? `\n*CUPÓN:* ${orderData.couponCode} (-$${discount})` : ''}\n\n*TOTAL A PAGAR:* $${total.toLocaleString('es-AR')}\n\n¡Les escribo para coordinar el pago/entrega!`;
 
     const url = `https://wa.me/${storeWhatsAppNumber}?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
@@ -76,10 +77,12 @@ export function CheckoutView() {
           <CheckCircle2 className="w-10 h-10 text-green-600" />
         </div>
 
-        <h1 className="font-['Bebas_Neue'] text-4xl md:text-5xl text-foreground mb-1 text-center tracking-wide">¡PEDIDO ENVIADO!</h1>
+        {/* 1. Cambio de título para dar seguridad */}
+        <h1 className="font-['Bebas_Neue'] text-4xl md:text-5xl text-foreground mb-1 text-center tracking-wide">¡PEDIDO RECIBIDO!</h1>
 
-        <p className="text-muted-foreground text-center mb-6 font-medium text-sm md:text-base">
-          Hola, <strong>{orderData.name}</strong>. Ya recibimos tu pedido.
+        {/* 2. Aclaración explícita de que ya está en el sistema */}
+        <p className="text-muted-foreground text-center mb-6 font-medium text-sm md:text-base px-2">
+          Hola, <strong>{orderData.name}</strong>. Tu pedido ya ingresó a nuestro sistema correctamente y lo estamos preparando.
         </p>
 
         <div className="bg-card border border-border rounded-2xl p-5 shadow-sm mb-6 w-full relative overflow-hidden">
@@ -132,19 +135,22 @@ export function CheckoutView() {
           </div>
         </div>
 
-        <div className="bg-secondary/50 rounded-xl p-4 mb-6 w-full text-center border border-border">
+        {/* 3. Ajuste del cuadro de aviso para separar el pedido de la coordinación */}
+        <div className="bg-secondary/50 rounded-xl p-4 mb-6 w-full text-center border border-primary/20">
           <p className="text-sm text-foreground font-medium">
-            Avisanos por WhatsApp para coordinar el pago en <strong>{orderData.paymentMethod}</strong> y el{' '}
-            {orderData.deliveryType === 'delivery' ? 'envío' : 'retiro'}.
+            <span className="block font-bold text-primary mb-1">Solo falta un último paso:</span>
+            Escribinos por WhatsApp tocando el boton verde <strong> para coordinar</strong> tu pago en <strong>{orderData.paymentMethod}</strong> y el{' '}
+            {orderData.deliveryType === 'delivery' ? 'envío a tu domicilio' : 'retiro por el local'}.
           </p>
         </div>
 
+        {/* 4. Botón con texto de acción claro */}
         <button
           onClick={handleWhatsApp}
           className="w-full bg-[#25D366] text-white font-extrabold text-lg py-4 px-6 rounded-xl shadow-lg hover:bg-[#20bd5a] hover:scale-[0.98] transition-all flex items-center justify-center gap-3 cursor-pointer"
         >
           <MessageCircle className="w-6 h-6" />
-          Enviar a WhatsApp
+          Coordinar Pago y {orderData.deliveryType === 'delivery' ? 'Envío' : 'Retiro'}
         </button>
 
         <button onClick={finalizarPedido} className="mt-5 text-muted-foreground font-bold hover:text-primary transition-colors cursor-pointer">

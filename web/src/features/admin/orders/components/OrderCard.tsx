@@ -21,10 +21,20 @@ export function OrderCard({ order, updateOrderStatus }: OrderCardProps) {
   const orderId = order._id || order.id || '';
 
   const handleWhatsAppClick = () => {
-    const cleanPhone = order.customer.phone.replace(/[^0-9]/g, '');
+    let cleanPhone = order.customer.phone.replace(/\D/g, '');
+
+    if (cleanPhone.startsWith('549')) cleanPhone = cleanPhone.slice(3);
+    else if (cleanPhone.startsWith('54')) cleanPhone = cleanPhone.slice(2);
+    if (cleanPhone.startsWith('0')) cleanPhone = cleanPhone.slice(1);
+
+    cleanPhone = cleanPhone.replace(/^(362|3624)15(\d+)$/, '$1$2');
+
+    const waNumber = `549${cleanPhone}`;
+
     const listaProductos = order.items.map(i => `${i.quantity}x ${i.title}${i.addons?.length ? ' (+ Extras)' : ''}`).join(', ');
-    const mensaje = `¡Hola ${order.customer.name}! Te escribimos de Un Toque Ahumado . Te aviso que tu pedido (${listaProductos}) ya está siendo preparado}.`;
-    window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(mensaje)}`, '_blank');
+    const mensaje = `¡Hola ${order.customer.name}! Te escribimos de Un Toque Ahumado . Te aviso que tu pedido (${listaProductos}) ya está siendo preparado.`;
+    
+    window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(mensaje)}`, '_blank');
   };
 
   return (
