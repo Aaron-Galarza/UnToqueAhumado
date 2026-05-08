@@ -82,7 +82,7 @@ export function CheckoutView() {
 
         {/* 2. Aclaración explícita de que ya está en el sistema */}
         <p className="text-muted-foreground text-center mb-6 font-medium text-sm md:text-base px-2">
-          Hola, <strong>{orderData.name}</strong>. Tu pedido ya ingresó a nuestro sistema correctamente y lo estamos preparando.
+          Hola, <strong>{orderData.name}</strong>. Tu pedido ya ingresó a nuestro sistema correctamente, baja y toca el boton verde (whatsapp) para coordinar el pago y entrega.
         </p>
 
         <div className="bg-card border border-border rounded-2xl p-5 shadow-sm mb-6 w-full relative overflow-hidden">
