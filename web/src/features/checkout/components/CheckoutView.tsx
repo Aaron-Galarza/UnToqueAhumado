@@ -78,11 +78,11 @@ export function CheckoutView() {
         </div>
 
         {/* 1. Cambio de título para dar seguridad */}
-        <h1 className="font-['Bebas_Neue'] text-4xl md:text-5xl text-foreground mb-1 text-center tracking-wide">¡PEDIDO RECIBIDO!</h1>
+        <h1 className="font-['Bebas_Neue'] text-4xl md:text-5xl text-foreground mb-1 text-center tracking-wide">¡PEDIDO REALIZADO!</h1>
 
         {/* 2. Aclaración explícita de que ya está en el sistema */}
         <p className="text-muted-foreground text-center mb-6 font-medium text-sm md:text-base px-2">
-          Hola, <strong>{orderData.name}</strong>. Tu pedido ya ingresó a nuestro sistema correctamente, baja y toca el boton verde (whatsapp) para coordinar el pago y entrega.
+          Hola, <strong>{orderData.name}</strong>. Tu pedido fue realizado, baja y toca el boton verde (whatsapp) para enviar tu comanda y coordinar el pago y entrega.
         </p>
 
         <div className="bg-card border border-border rounded-2xl p-5 shadow-sm mb-6 w-full relative overflow-hidden">

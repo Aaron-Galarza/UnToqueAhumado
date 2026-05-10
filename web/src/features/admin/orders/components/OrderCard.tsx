@@ -20,7 +20,8 @@ interface OrderCardProps {
 export function OrderCard({ order, updateOrderStatus }: OrderCardProps) {
   const orderId = order._id || order.id || '';
 
-  const handleWhatsAppClick = () => {
+const handleWhatsAppClick = () => {
+    // 1. Limpieza de número a prueba de balas
     let cleanPhone = order.customer.phone.replace(/\D/g, '');
 
     if (cleanPhone.startsWith('549')) cleanPhone = cleanPhone.slice(3);
@@ -31,9 +32,23 @@ export function OrderCard({ order, updateOrderStatus }: OrderCardProps) {
 
     const waNumber = `549${cleanPhone}`;
 
+    // 2. Armado de la lista de productos
     const listaProductos = order.items.map(i => `${i.quantity}x ${i.title}${i.addons?.length ? ' (+ Extras)' : ''}`).join(', ');
-    const mensaje = `¡Hola ${order.customer.name}! Te escribimos de Un Toque Ahumado . Te aviso que tu pedido (${listaProductos}) ya está siendo preparado.`;
     
+    // 3. Armado inteligente del mensaje
+    let mensaje = `¡Hola *${order.customer.name}*! Te escribimos de Un Toque Ahumado . Te aviso que tu pedido (${listaProductos}) ya está siendo preparado.`;
+
+    // Si es Delivery, le pedimos la ubicación
+    if (order.deliveryType === 'delivery') {
+      mensaje += `\n\n Por favor, compartinos tu *ubicación actual* por acá así el repartidor llega directo a tu domicilio.`;
+    }
+
+    // Si es Transferencia, le pasamos el Alias (le agregamos * para que salga en negrita en WhatsApp)
+    if (order.paymentMethod.toLowerCase().includes('transferencia')) {
+      mensaje += `\n\n Te dejamos los datos para ir adelantando el pago:\n*ALIAS:* Dylancamachorojas`;
+    }
+    
+    // 4. Disparamos a WhatsApp
     window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(mensaje)}`, '_blank');
   };
 
